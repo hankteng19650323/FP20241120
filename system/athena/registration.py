@@ -27,6 +27,20 @@ def is_registered_device() -> bool:
 def register(show_spinner=False) -> str | None:
   params = Params()
 
+  if params.get("UseFrogServer"):
+    os.environ["API_HOST"] = "https://api.springerelectronics.com"
+    os.environ["ATHENA_HOST"] = "wss://athena.springerelectronics.com"
+    print("\033[0;36mUsing FrogServer\033[0m")
+    if params.get("DongleId") != params.get("FrogId"):
+      params.put("DongleIdPrev", params.get("DongleId"))
+      if params.get("FrogId", encoding='utf8') != "":
+        params.put("DongleId", params.get("FrogId"))
+      else:
+        params.remove("DongleId")
+
+  elif params.get("DongleIdPrev"):
+    params.put("DongleId", params.get("DongleIdPrev"))
+
   IMEI = params.get("IMEI", encoding='utf8')
   HardwareSerial = params.get("HardwareSerial", encoding='utf8')
   dongle_id: str | None = params.get("DongleId", encoding='utf8')
@@ -95,6 +109,8 @@ def register(show_spinner=False) -> str | None:
 
   if dongle_id:
     params.put("DongleId", dongle_id)
+    if params.get_bool("UseFrogServer"):
+      params.put("FrogId", dongle_id)
     set_offroad_alert("Offroad_UnofficialHardware", (dongle_id == UNREGISTERED_DONGLE_ID) and not PC)
   return dongle_id
 
