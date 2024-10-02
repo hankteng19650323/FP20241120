@@ -163,7 +163,10 @@ class Controls:
 
     self.can_log_mono_time = 0
 
-    self.startup_event = get_startup_event(car_recognized, not self.CP.passive, len(self.CP.carFw) > 0)
+    if car_recognized and not self.CP.passive and self.CP.secOcRequired and not self.CP.secOcKeyAvailable:
+      self.startup_event = EventName.startupNoSecOcKey
+    else:
+      self.startup_event = get_startup_event(car_recognized, not self.CP.passive, len(self.CP.carFw) > 0)
 
     if not sounds_available:
       self.events.add(EventName.soundsUnavailable, static=True)

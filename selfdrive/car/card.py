@@ -10,6 +10,7 @@ from panda import ALTERNATIVE_EXPERIENCE
 
 from openpilot.common.params import Params
 from openpilot.common.realtime import config_realtime_process, Priority, Ratekeeper, DT_CTRL
+from openpilot.common.swaglog import cloudlog
 
 from openpilot.selfdrive.pandad import can_list_to_can_capnp
 from openpilot.selfdrive.car.car_helpers import get_car, get_one_can
@@ -68,6 +69,18 @@ class Car:
       safety_config = car.CarParams.SafetyConfig.new_message()
       safety_config.safetyModel = car.CarParams.SafetyModel.noOutput
       self.CP.safetyConfigs = [safety_config]
+
+    if self.CP.secOcRequired and not self.params.get_bool("IsReleaseBranch"):
+      secoc_key = self.params.get("SecOCKey", encoding='utf8')
+      if secoc_key is not None:
+        saved_secoc_key = bytes.fromhex(secoc_key.strip())
+        if len(saved_secoc_key) == 16:
+          self.CP.secOcKeyAvailable = True
+          self.CI.CS.secoc_key = saved_secoc_key
+          if controller_available:
+            self.CI.CC.secoc_key = saved_secoc_key
+        else:
+          cloudlog.warning("Saved SecOC key is invalid")
 
     # Write previous route's CarParams
     prev_cp = self.params.get("CarParamsPersistent")
