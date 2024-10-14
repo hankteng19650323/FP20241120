@@ -144,12 +144,15 @@ void TogglesPanel::showEvent(QShowEvent *event) {
 }
 
 void TogglesPanel::updateToggles() {
+  UIState *s = uiState();
+  UIScene &scene = s->scene;
+
   auto disengage_on_accelerator_toggle = toggles["DisengageOnAccelerator"];
-  disengage_on_accelerator_toggle->setVisible(!params.getBool("AlwaysOnLateral"));
+  disengage_on_accelerator_toggle->setVisible(!scene.always_on_lateral);
   auto driver_camera_toggle = toggles["RecordFront"];
-  driver_camera_toggle->setVisible(!(params.getBool("DeviceManagement") && params.getBool("NoLogging") && params.getBool("NoUploads")));
+  driver_camera_toggle->setVisible(!(scene.no_logging && scene.no_uploads));
   auto nav_settings_left_toggle = toggles["NavSettingLeftSide"];
-  nav_settings_left_toggle->setVisible(!params.getBool("FullMap"));
+  nav_settings_left_toggle->setVisible(!scene.full_map);
 
   auto experimental_mode_toggle = toggles["ExperimentalMode"];
   auto op_long_toggle = toggles["ExperimentalLongitudinalEnabled"];
@@ -178,13 +181,7 @@ void TogglesPanel::updateToggles() {
     op_long_toggle->setVisible(CP.getExperimentalLongitudinalAvailable());
     if (hasLongitudinalControl(CP)) {
       // normal description and toggle
-      bool conditional_experimental = params.getBool("ConditionalExperimental");
-      if (conditional_experimental) {
-        params.putBool("ExperimentalMode", true);
-        params.putBool("ExperimentalModeConfirmed", true);
-        experimental_mode_toggle->refresh();
-      }
-      experimental_mode_toggle->setEnabled(!conditional_experimental);
+      experimental_mode_toggle->setEnabled(!scene.conditional_experimental);
       experimental_mode_toggle->setDescription(e2e_description);
       long_personality_setting->setEnabled(true);
     } else {
@@ -230,7 +227,7 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
   connect(dcamBtn, &ButtonControl::clicked, [=]() { emit showDriverView(); });
   addItem(dcamBtn);
 
-  resetCalibBtn = new ButtonControl(tr("Reset Calibration"), tr("RESET"), "");
+  auto resetCalibBtn = new ButtonControl(tr("Reset Calibration"), tr("RESET"), "");
   connect(resetCalibBtn, &ButtonControl::showDescriptionEvent, this, &DevicePanel::updateCalibDescription);
   connect(resetCalibBtn, &ButtonControl::clicked, [&]() {
     if (ConfirmationDialog::confirm(tr("Are you sure you want to reset calibration?"), tr("Reset"), this)) {
@@ -361,19 +358,19 @@ void DevicePanel::poweroff() {
 void DevicePanel::showEvent(QShowEvent *event) {
   pair_device->setVisible(uiState()->primeType() == PrimeType::UNPAIRED);
   ListWidget::showEvent(event);
-
-  // Frogpilot variables
-  resetCalibBtn->setVisible(!params.getBool("ModelManagement"));
 }
 
 void SettingsWindow::hideEvent(QHideEvent *event) {
+  closeMapBoxInstructions();
+  closeMapSelection();
   closePanel();
   closeParentToggle();
 
+  mapboxInstructionsOpen = false;
+  mapSelectionOpen = false;
   panelOpen = false;
   parentToggleOpen = false;
   subParentToggleOpen = false;
-  subSubParentToggleOpen = false;
 }
 
 void SettingsWindow::showEvent(QShowEvent *event) {
@@ -412,9 +409,12 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
   sidebar_layout->addSpacing(10);
   sidebar_layout->addWidget(close_btn, 0, Qt::AlignRight);
   QObject::connect(close_btn, &QPushButton::clicked, [this]() {
-    if (subSubParentToggleOpen) {
-      closeSubSubParentToggle();
-      subSubParentToggleOpen = false;
+    if (mapboxInstructionsOpen) {
+      closeMapBoxInstructions();
+      mapboxInstructionsOpen = false;
+    } else if (mapSelectionOpen) {
+      closeMapSelection();
+      mapSelectionOpen = false;
     } else if (subParentToggleOpen) {
       closeSubParentToggle();
       subParentToggleOpen = false;
@@ -441,10 +441,12 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
   QObject::connect(toggles, &TogglesPanel::updateMetric, this, &SettingsWindow::updateMetric);
 
   FrogPilotSettingsWindow *frogpilotSettingsWindow = new FrogPilotSettingsWindow(this);
+  QObject::connect(frogpilotSettingsWindow, &FrogPilotSettingsWindow::closeMapBoxInstructions, [this]() {mapboxInstructionsOpen=false;});
+  QObject::connect(frogpilotSettingsWindow, &FrogPilotSettingsWindow::openMapBoxInstructions, [this]() {mapboxInstructionsOpen=true;});
+  QObject::connect(frogpilotSettingsWindow, &FrogPilotSettingsWindow::openMapSelection, [this]() {mapSelectionOpen=true;});
   QObject::connect(frogpilotSettingsWindow, &FrogPilotSettingsWindow::openPanel, [this]() {panelOpen=true;});
   QObject::connect(frogpilotSettingsWindow, &FrogPilotSettingsWindow::openParentToggle, [this]() {parentToggleOpen=true;});
   QObject::connect(frogpilotSettingsWindow, &FrogPilotSettingsWindow::openSubParentToggle, [this]() {subParentToggleOpen=true;});
-  QObject::connect(frogpilotSettingsWindow, &FrogPilotSettingsWindow::openSubSubParentToggle, [this]() {subSubParentToggleOpen=true;});
 
   QList<QPair<QString, QWidget *>> panels = {
     {tr("Device"), device},
@@ -485,6 +487,52 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
     panel_widget->addWidget(panel_frame);
 
     QObject::connect(btn, &QPushButton::clicked, [=, w = panel_frame]() {
+      if (w->widget() == frogpilotSettingsWindow) {
+        bool customizationLevelConfirmed = params.getBool("CustomizationLevelConfirmed");
+
+        if (!customizationLevelConfirmed) {
+          int frogpilotHours = paramsTracking.getInt("FrogPilotMinutes") / 60;
+          int openpilotHours = params.getInt("openpilotMinutes") / 60;
+
+          if (frogpilotHours < 1 && openpilotHours < 100) {
+            if (FrogPilotConfirmationDialog::toggleAlert(tr("Welcome to FrogPilot! Since you're new to FrogPilot, the 'Basic' toggle preset has been applied, but you can change this at any time via the 'Customization Level' button!"), tr("Sounds good!"), this, true)) {
+              params.putBool("CustomizationLevelConfirmed", true);
+              params.putInt("CustomizationLevel", 0);
+            }
+          } else if (frogpilotHours < 50 && openpilotHours < 100) {
+            if (FrogPilotConfirmationDialog::toggleAlert(tr("Since you're fairly new to FrogPilot, the 'Basic' toggle preset has been applied, but you can change this at any time via the 'Customization Level' button!"), tr("Sounds good!"), this, true)) {
+              params.putBool("CustomizationLevelConfirmed", true);
+              params.putInt("CustomizationLevel", 0);
+            }
+          } else if (frogpilotHours < 100) {
+            if (openpilotHours >= 100 && frogpilotHours < 100) {
+              if (FrogPilotConfirmationDialog::toggleAlert(tr("Since you're experienced with openpilot, the 'Standard' toggle preset has been applied, but you can change this at any time via the 'Customization Level' button!"), tr("Sounds good!"), this, true)) {
+                params.putBool("CustomizationLevelConfirmed", true);
+                params.putInt("CustomizationLevel", 1);
+              }
+            } else {
+              if (FrogPilotConfirmationDialog::toggleAlert(tr("Since you're experienced with FrogPilot, the 'Standard' toggle preset has been applied, but you can change this at any time via the 'Customization Level' button!"), tr("Sounds good!"), this, true)) {
+                params.putBool("CustomizationLevelConfirmed", true);
+                params.putInt("CustomizationLevel", 1);
+              }
+            }
+          } else if (frogpilotHours >= 100) {
+            if (FrogPilotConfirmationDialog::toggleAlert(tr("Since you're very experienced with FrogPilot, the 'Advanced' toggle preset has been applied, but you can change this at any time via the 'Customization Level' button!"), tr("Sounds good!"), this, true)) {
+              params.putBool("CustomizationLevelConfirmed", true);
+              params.putInt("CustomizationLevel", 2);
+            }
+          }
+        }
+      }
+
+      if (mapboxInstructionsOpen) {
+        closeMapBoxInstructions();
+        mapboxInstructionsOpen = false;
+      }
+      if (mapSelectionOpen) {
+        closeMapSelection();
+        mapSelectionOpen = false;
+      }
       if (panelOpen) {
         closePanel();
         panelOpen = false;

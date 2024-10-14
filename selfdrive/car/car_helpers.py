@@ -21,13 +21,8 @@ FRAME_FINGERPRINT = 100  # 1s
 EventName = car.CarEvent.EventName
 
 
-def get_startup_event(car_recognized, controller_available, fw_seen, block_user, frogpilot_toggles):
-  if block_user:
-    return EventName.blockUser
-  elif frogpilot_toggles.personalize_openpilot:
-    event = EventName.customStartupAlert
-  else:
-    event = EventName.startupMaster
+def get_startup_event(car_recognized, controller_available, fw_seen):
+  event = EventName.customStartupAlert
 
   if not car_recognized:
     if fw_seen:
