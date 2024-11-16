@@ -224,6 +224,7 @@ typedef struct UIScene {
   bool turn_signal_left;
   bool turn_signal_right;
   bool unlimited_road_ui_length;
+  bool use_frogpilot_server;
   bool use_si_metrics;
   bool use_stock_colors;
   bool use_stock_wheel;

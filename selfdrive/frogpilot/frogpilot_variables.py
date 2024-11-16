@@ -318,6 +318,7 @@ frogpilot_default_params: list[tuple[str, str | bytes]] = [
   ("TurnDesires", "0"),
   ("UnlimitedLength", "1"),
   ("UnlockDoors", "1"),
+  ("UseFrogServer", "1"),
   ("UseSI", "1"),
   ("UseVienna", "0"),
   ("VisionTurnControl", "1"),
@@ -685,6 +686,8 @@ class FrogPilotVariables:
     toggle.toyota_doors = car_make == "toyota" and self.params.get_bool("ToyotaDoors")
     toggle.lock_doors = toggle.toyota_doors and self.params.get_bool("LockDoors")
     toggle.unlock_doors = toggle.toyota_doors and self.params.get_bool("UnlockDoors")
+
+    toggle.use_frogpilot_server = self.params.get_bool("UseFrogServer")
 
     toggle.volt_sng = car_model == "CHEVROLET_VOLT" and self.params.get_bool("VoltSNG")
 
