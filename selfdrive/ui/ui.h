@@ -196,7 +196,6 @@ typedef struct UIScene {
   bool random_events;
   bool red_light;
   bool reverse;
-  bool right_hand_drive;
   bool road_name_ui;
   bool rotating_wheel;
   bool screen_recorder;
@@ -210,6 +209,7 @@ typedef struct UIScene {
   bool speed_limit_changed;
   bool speed_limit_controller;
   bool speed_limit_overridden;
+  bool speed_limit_sources;
   bool speed_limit_vienna;
   bool standby_mode;
   bool standstill;
@@ -251,6 +251,7 @@ typedef struct UIScene {
   float speed_jerk;
   float speed_jerk_difference;
   float speed_limit;
+  float speed_limit_map;
   float speed_limit_offset;
   float speed_limit_overridden_speed;
   float steer;
@@ -261,11 +262,13 @@ typedef struct UIScene {
   int conditional_limit;
   int conditional_limit_lead;
   int conditional_status;
+  int dashboard_speed_limit;
   int desired_follow;
   int driver_camera_timer;
   int map_style;
   int minimum_lane_change_speed;
   int model_length;
+  int navigation_speed_limit;
   int obstacle_distance;
   int obstacle_distance_stock;
   int screen_brightness;
@@ -276,6 +279,9 @@ typedef struct UIScene {
   int steering_angle_deg;
   int stopped_equivalence;
   int tethering_config;
+  int upcoming_speed_limit;
+
+  std::string speed_limit_source;
 
   std::vector<RadarTrack> radar_tracks;
 

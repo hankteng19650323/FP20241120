@@ -221,8 +221,6 @@ void update_dmonitoring(UIState *s, const cereal::DriverStateV2::Reader &drivers
     vec3 kpt_this = matvecmul3(r_xyz, default_face_kpts_3d[kpi]);
     scene.face_kpts_draw[kpi] = (vec3){{kpt_this.v[0], kpt_this.v[1], (float)(kpt_this.v[2] * (1.0-dm_fade_state) + 8 * dm_fade_state)}};
   }
-
-  scene.right_hand_drive = is_rhd;
 }
 
 static void update_sockets(UIState *s) {
@@ -309,7 +307,12 @@ static void update_state(UIState *s) {
   if (sm.updated("frogpilotCarState")) {
     auto frogpilotCarState = sm["frogpilotCarState"].getFrogpilotCarState();
     scene.brake_lights_on = frogpilotCarState.getBrakeLights();
+    scene.dashboard_speed_limit = frogpilotCarState.getDashboardSpeedLimit();
     scene.traffic_mode_active = frogpilotCarState.getTrafficModeActive();
+  }
+  if (sm.updated("frogpilotNavigation")) {
+    auto frogpilotNavigation = sm["frogpilotNavigation"].getFrogpilotNavigation();
+    scene.navigation_speed_limit = frogpilotNavigation.getNavigationSpeedLimit();
   }
   if (sm.updated("frogpilotPlan")) {
     auto frogpilotPlan = sm["frogpilotPlan"].getFrogpilotPlan();
@@ -326,11 +329,14 @@ static void update_state(UIState *s) {
     scene.speed_jerk_difference = frogpilotPlan.getSpeedJerkStock() - scene.speed_jerk;
     scene.speed_limit = frogpilotPlan.getSlcSpeedLimit();
     scene.speed_limit_changed = scene.speed_limit_controller && frogpilotPlan.getSpeedLimitChanged();
+    scene.speed_limit_map = frogpilotPlan.getSlcMapSpeedLimit();
     scene.speed_limit_offset = frogpilotPlan.getSlcSpeedLimitOffset();
     scene.speed_limit_overridden = frogpilotPlan.getSlcOverridden();
     scene.speed_limit_overridden_speed = frogpilotPlan.getSlcOverriddenSpeed();
+    scene.speed_limit_source = frogpilotPlan.getSlcSpeedLimitSource().cStr();
     scene.stopped_equivalence = frogpilotPlan.getStoppedEquivalenceFactor();
     scene.unconfirmed_speed_limit = frogpilotPlan.getUnconfirmedSlcSpeedLimit();
+    scene.upcoming_speed_limit = frogpilotPlan.getUpcomingSLCSpeedLimit();
     scene.vtsc_controlling_curve = frogpilotPlan.getVtscControllingCurve();
     if (frogpilotPlan.getTogglesUpdated()) {
       scene.frogpilot_toggles = QJsonDocument::fromJson(QString::fromStdString(params.get("FrogPilotToggles")).toUtf8()).object();
@@ -448,6 +454,7 @@ void ui_update_frogpilot_params(UIState *s) {
   scene.sidebar_metrics = scene.frogpilot_toggles.value("sidebar_metrics").toBool();
   scene.signal_metrics = scene.frogpilot_toggles.value("signal_metrics").toBool();
   scene.speed_limit_controller = scene.frogpilot_toggles.value("speed_limit_controller").toBool();
+  scene.speed_limit_sources = scene.frogpilot_toggles.value("speed_limit_sources").toBool();
   scene.speed_limit_vienna = scene.frogpilot_toggles.value("speed_limit_vienna").toBool();
   scene.standby_mode = scene.frogpilot_toggles.value("standby_mode").toBool();
   scene.static_pedals_on_ui = scene.frogpilot_toggles.value("static_pedals_on_ui").toBool();
@@ -512,7 +519,7 @@ UIState::UIState(QObject *parent) : QObject(parent) {
     "pandaStates", "carParams", "driverMonitoringState", "carState", "liveLocationKalman", "driverStateV2",
     "wideRoadCameraState", "managerState", "navInstruction", "navRoute", "uiPlan", "clocks",
     "carControl", "liveTorqueParameters", "frogpilotCarControl", "frogpilotCarState", "frogpilotDeviceState",
-    "frogpilotPlan",
+    "frogpilotNavigation", "frogpilotPlan",
   });
 
   Params params;

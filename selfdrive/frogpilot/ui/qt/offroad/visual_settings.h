@@ -49,7 +49,7 @@ private:
 
   std::set<QString> navigationUIKeys = {
     "BigMap", "MapStyle", "RoadNameUI",
-    "ShowSLCOffset", "UseVienna"
+    "ShowSLCOffset", "SpeedLimitSources", "UseVienna"
   };
 
   FrogPilotButtonToggleControl *borderMetricsBtn;

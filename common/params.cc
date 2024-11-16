@@ -498,6 +498,7 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"SoundToDownload", PERSISTENT},
     {"SpeedLimitChangedAlert", PERSISTENT | FROGPILOT_STORAGE | FROGPILOT_CONTROLS},
     {"SpeedLimitController", PERSISTENT | FROGPILOT_STORAGE | FROGPILOT_CONTROLS},
+    {"SpeedLimitSources", PERSISTENT | FROGPILOT_STORAGE | FROGPILOT_VISUALS},
     {"StandardFollow", PERSISTENT | FROGPILOT_STORAGE | FROGPILOT_CONTROLS},
     {"StandardJerkAcceleration", PERSISTENT | FROGPILOT_STORAGE | FROGPILOT_CONTROLS},
     {"StandardJerkDanger", PERSISTENT | FROGPILOT_STORAGE | FROGPILOT_CONTROLS},

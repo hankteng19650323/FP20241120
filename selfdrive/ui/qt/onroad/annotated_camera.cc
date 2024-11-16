@@ -106,14 +106,39 @@ void AnnotatedCameraWidget::updateState(int alert_height, const UIState &s) {
 void AnnotatedCameraWidget::drawHud(QPainter &p) {
   p.save();
 
+  static QElapsedTimer flashTimer;
+  static bool isFlashing = false;
+
+  QColor flashColor(255, 0, 0, 255);
+  QPen flashPenColor;
+
+  if (speedLimitChanged) {
+    if (!isFlashing) {
+      flashTimer.start();
+      isFlashing = true;
+    }
+
+    float elapsed = flashTimer.elapsed();
+    float maxElapsed = 10000.0f;
+    float flashInterval = 350.0f * (1.0f + std::min(elapsed / maxElapsed, 1.0f));
+
+    flashPenColor = (elapsed < maxElapsed && fmod(elapsed, flashInterval) < flashInterval / 2) ? QPen(flashColor, 6) : QPen(blackColor(), 6);
+
+    if (elapsed >= maxElapsed) {
+      isFlashing = false;
+      flashPenColor = QPen(flashColor, 6);
+    }
+  }
+
   // Header gradient
   QLinearGradient bg(0, UI_HEADER_HEIGHT - (UI_HEADER_HEIGHT / 2.5), 0, UI_HEADER_HEIGHT);
   bg.setColorAt(0, QColor::fromRgbF(0, 0, 0, 0.45));
   bg.setColorAt(1, QColor::fromRgbF(0, 0, 0, 0));
   p.fillRect(0, 0, width(), UI_HEADER_HEIGHT, bg);
 
+  QString newSpeedLimitStr = (unconfirmedSpeedLimit > 1) ? QString::number(std::nearbyint(unconfirmedSpeedLimit * (is_metric ? MS_TO_KPH : MS_TO_MPH))) : "–";
   QString speedLimitStr = (speedLimit > 1) ? QString::number(std::nearbyint(speedLimit)) : "–";
-  QString speedLimitOffsetStr = slcSpeedLimitOffset == 0 ? "–" : QString::number(slcSpeedLimitOffset, 'f', 0).prepend(slcSpeedLimitOffset > 0 ? "+" : "");
+  QString speedLimitOffsetStr = (slcSpeedLimitOffset == 0) ? "–" : QString::number(slcSpeedLimitOffset, 'f', 0).prepend((slcSpeedLimitOffset > 0) ? "+" : "");
   QString speedStr = QString::number(std::nearbyint(speed));
   QString setSpeedStr = is_cruise_set ? QString::number(std::nearbyint(setSpeed - cruiseAdjustment)) : "–";
 
@@ -135,7 +160,7 @@ void AnnotatedCameraWidget::drawHud(QPainter &p) {
     int bottom_radius = has_eu_speed_limit ? 100 : 32;
 
     QRect set_speed_rect(QPoint(60 + (default_size.width() - set_speed_size.width()) / 2, 45), set_speed_size);
-    if (is_cruise_set && cruiseAdjustment != 0) {
+    if (is_cruise_set && cruiseAdjustment > 1) {
       float transition = qBound(0.0f, 5.0f * (cruiseAdjustment / setSpeed), 1.0f);
       QColor min = whiteColor(75);
       QColor max = vtscControllingCurve ? redColor() : greenColor();
@@ -204,6 +229,28 @@ void AnnotatedCameraWidget::drawHud(QPainter &p) {
         p.setFont(InterFont(70, QFont::Bold));
         p.drawText(sign_rect.adjusted(0, 85, 0, 0), Qt::AlignTop | Qt::AlignHCenter, speedLimitStr);
       }
+
+      if (speedLimitChanged) {
+        QRect new_sign_rect = sign_rect.translated(sign_rect.width() + 25, 0);
+        new_sign_rect.setWidth(223);
+
+        newSpeedLimitRect = new_sign_rect;
+        newSpeedLimitRect.setWidth(new_sign_rect.width());
+        newSpeedLimitRect.setHeight(new_sign_rect.height());
+
+        p.setPen(Qt::NoPen);
+        p.setBrush(whiteColor());
+        p.drawRoundedRect(new_sign_rect, 24, 24);
+        p.setPen(flashPenColor);
+        p.drawRoundedRect(new_sign_rect.adjusted(9, 9, -9, -9), 16, 16);
+
+        p.setOpacity(1.0);
+        p.setFont(InterFont(28, QFont::DemiBold));
+        p.drawText(new_sign_rect.adjusted(0, 22, 0, 0), Qt::AlignTop | Qt::AlignHCenter, tr("PENDING"));
+        p.drawText(new_sign_rect.adjusted(0, 51, 0, 0), Qt::AlignTop | Qt::AlignHCenter, tr("LIMIT"));
+        p.setFont(InterFont(70, QFont::Bold));
+        p.drawText(new_sign_rect.adjusted(0, 85, 0, 0), Qt::AlignTop | Qt::AlignHCenter, newSpeedLimitStr);
+      }
     }
 
     // EU (Vienna style) sign
@@ -225,13 +272,72 @@ void AnnotatedCameraWidget::drawHud(QPainter &p) {
         p.setFont(InterFont((speedLimitStr.size() >= 3) ? 60 : 70, QFont::Bold));
         p.drawText(sign_rect, Qt::AlignCenter, speedLimitStr);
       }
+
+      if (speedLimitChanged) {
+        QRect new_sign_rect = sign_rect.translated(sign_rect.width() + 25, 0);
+        p.setPen(Qt::NoPen);
+        p.setBrush(whiteColor());
+        p.drawEllipse(new_sign_rect);
+        p.setPen(QPen(Qt::red, 20));
+        p.drawEllipse(new_sign_rect.adjusted(16, 16, -16, -16));
+
+        p.setOpacity(1.0);
+        p.setPen(flashPenColor);
+        p.setFont(InterFont((newSpeedLimitStr.size() >= 3) ? 60 : 70, QFont::Bold));
+        p.drawText(new_sign_rect, Qt::AlignCenter, newSpeedLimitStr);
+      }
     }
+
+    if (speedLimitSources && (has_eu_speed_limit || has_us_speed_limit)) {
+      std::function<void(const QRect&, const QPixmap&, const QString&, double)> drawSource = [&](const QRect &rect, const QPixmap &icon, const QString &title, double speedLimitValue) {
+        QRect iconRect(rect.x() + 20, rect.y() + (rect.height() - img_size / 4) / 2, img_size / 4, img_size / 4);
+
+        QString speedText;
+        if (speedLimitValue > 1) {
+          double convertedSpeed = std::nearbyint(speedLimitValue * (is_metric ? MS_TO_KPH : MS_TO_MPH));
+          speedText = QString::number(convertedSpeed) + " " + (is_metric ? tr("kph") : tr("mph"));
+        } else {
+          speedText = "N/A";
+        }
+
+        QString fullText = tr(title.toUtf8().constData()) + " - " + speedText;
+
+        if (speedLimitSource == title.toStdString()) {
+          p.setPen(QPen(redColor(255), 10));
+          p.setBrush(redColor(166));
+        } else {
+          p.setPen(QPen(blackColor(255), 10));
+          p.setBrush(blackColor(166));
+        }
+
+        p.drawRoundedRect(rect, 24, 24);
+
+        p.setRenderHint(QPainter::Antialiasing);
+        p.drawPixmap(iconRect, icon);
+
+        p.setFont(InterFont(35, QFont::DemiBold));
+        p.setPen(QPen(whiteColor(), 6));
+        QRect textRect(iconRect.right() + 10, rect.y(), rect.width() - iconRect.width() - 30, rect.height());
+        p.drawText(textRect, Qt::AlignVCenter | Qt::AlignLeft, fullText);
+      };
+
+      QRect dashboardRect(sign_rect.x() - sign_margin, sign_rect.y() + sign_rect.height() + 35, 500, 60);
+      QRect navigationRect(dashboardRect.x(), dashboardRect.y() + dashboardRect.height() + 15, 500, 60);
+      QRect offlineMapsRect(navigationRect.x(), navigationRect.y() + navigationRect.height() + 15, 500, 60);
+      QRect upcomingLimitRect(offlineMapsRect.x(), offlineMapsRect.y() + offlineMapsRect.height() + 15, 500, 60);
+
+      drawSource(dashboardRect, dashboardIcon, "Dashboard", dashboardSpeedLimit);
+      drawSource(navigationRect, navigationIcon, "Navigation", navigationSpeedLimit);
+      drawSource(offlineMapsRect, offlineMapsIcon, "Offline Maps", mapsSpeedLimit);
+      drawSource(upcomingLimitRect, upcomingMapsIcon, "Upcoming", upcomingSpeedLimit);
+    }
+
     p.restore();
   }
 
   // current speed
   if (!(bigMapOpen || hideSpeed)) {
-    if (standstillDuration != 0) {
+    if (standstillDuration > 1) {
       float transition = qBound(0.0f, standstillDuration / 120.0f, 1.0f);
       QColor start, end;
 
@@ -250,11 +356,13 @@ void AnnotatedCameraWidget::drawHud(QPainter &p) {
         transition = 0.0f;
       }
 
-      float red = start.redF() + transition * (end.redF() - start.redF());
-      float green = start.greenF() + transition * (end.greenF() - start.greenF());
-      float blue = start.blueF() + transition * (end.blueF() - start.blueF());
+      QColor blendedColor(
+        start.red() + transition * (end.red() - start.red()),
+        start.green() + transition * (end.green() - start.green()),
+        start.blue() + transition * (end.blue() - start.blue())
+      );
 
-      p.setPen(QPen(QColor::fromRgbF(red, green, blue)));
+      p.setPen(QPen(blendedColor));
 
       int minutes = standstillDuration / 60;
       int seconds = standstillDuration % 60;
@@ -841,7 +949,11 @@ void AnnotatedCameraWidget::initializeFrogPilotWidgets() {
 
   main_layout->addLayout(bottom_layout);
 
+  dashboardIcon = loadPixmap("../frogpilot/assets/other_images/dashboard_icon.png", QSize(img_size / 2, img_size / 2));
+  navigationIcon = loadPixmap("../frogpilot/assets/other_images/navigation_icon.png", QSize(img_size / 2, img_size / 2));
+  offlineMapsIcon = loadPixmap("../frogpilot/assets/other_images/offline_maps_icon.png", QSize(img_size / 2, img_size / 2));
   stopSignImg = loadPixmap("../frogpilot/assets/other_images/stop_sign.png", QSize(img_size, img_size));
+  upcomingMapsIcon = loadPixmap("../frogpilot/assets/other_images/upcoming_maps_icon.png", QSize(img_size / 2, img_size / 2));
 
   animationTimer = new QTimer(this);
   QObject::connect(animationTimer, &QTimer::timeout, [this] {
@@ -944,11 +1056,17 @@ void AnnotatedCameraWidget::updateFrogPilotVariables(int alert_height, const UIS
   }
 
   speedLimitController = scene.speed_limit_controller;
+  dashboardSpeedLimit = speedLimitController ? scene.dashboard_speed_limit : 0;
+  mapsSpeedLimit = speedLimitController ? scene.speed_limit_map : 0;
+  navigationSpeedLimit = speedLimitController ? scene.navigation_speed_limit : 0;
   showSLCOffset = speedLimitController && scene.show_speed_limit_offset;
   slcOverridden = speedLimitController && scene.speed_limit_overridden;
   slcSpeedLimitOffset = scene.speed_limit_offset * (is_metric ? MS_TO_KPH : MS_TO_MPH);
   speedLimitChanged = speedLimitController && scene.speed_limit_changed;
+  speedLimitSource = scene.speed_limit_source;
+  speedLimitSources = scene.speed_limit_sources;
   unconfirmedSpeedLimit = speedLimitController ? scene.unconfirmed_speed_limit : 0;
+  upcomingSpeedLimit = scene.upcoming_speed_limit;
   useViennaSLCSign = scene.speed_limit_vienna;
 
   bool stoppedTimer = scene.stopped_timer && scene.standstill && scene.started_timer / UI_FREQ >= 10 && !mapOpen;
@@ -985,10 +1103,6 @@ void AnnotatedCameraWidget::paintFrogPilotWidgets(const cereal::ModelDataV2::Rea
 
   if (true) {
     drawRadarTracks(painter, s.scene);
-  }
-
-  if (speedLimitChanged) {
-    drawSLCConfirmation(painter);
   }
 
   if (turnSignalAnimation && (turnSignalLeft || turnSignalRight) && !bigMapOpen && ((!mapOpen && standstillDuration == 0) || signalStyle != "static")) {
@@ -1141,7 +1255,7 @@ void AnnotatedCameraWidget::drawLeadInfo(QPainter &p) {
 
   auto createDiffText = [&](double data, double stockData) {
     double difference = std::round((data - stockData) * distanceConversion);
-    return difference != 0 ? QString(" (%1%2)").arg(difference > 0 ? "+" : "").arg(difference) : QString();
+    return difference > 1 ? QString(" (%1%2)").arg(difference > 0 ? "+" : "").arg(difference) : QString();
   };
 
   p.save();
@@ -1260,36 +1374,6 @@ void AnnotatedCameraWidget::drawRadarTracks(QPainter &painter, const UIScene &sc
   }
 
   painter.restore();
-}
-
-void AnnotatedCameraWidget::drawSLCConfirmation(QPainter &p) {
-  p.save();
-
-  QSize size = this->size();
-  int halfWidth = size.width() / 2;
-
-  QRect leftRect(0, 0, halfWidth, size.height());
-  QRect rightRect(halfWidth, 0, halfWidth, size.height());
-
-  p.setOpacity(0.5);
-  p.fillRect(leftRect, rightHandDM ? redColor() : greenColor());
-  p.fillRect(rightRect, rightHandDM ? greenColor() : redColor());
-  p.setOpacity(1.0);
-
-  p.setFont(InterFont(75, QFont::Bold));
-  p.setPen(Qt::white);
-
-  QString unitText = is_metric ? tr("kph") : tr("mph");
-  QString speedText = QString::number(std::nearbyint(unconfirmedSpeedLimit * (is_metric ? MS_TO_KPH : MS_TO_MPH))) + " " + unitText;
-  QString confirmText = tr("Confirm speed limit\n") + speedText;
-  QString ignoreText = tr("Ignore speed limit\n") + speedText;
-
-  QRect textRect(0, leftRect.height() / 2 - 225, halfWidth, leftRect.height() / 2);
-
-  p.drawText(textRect.translated(0, 0), Qt::AlignCenter, rightHandDM ? ignoreText : confirmText);
-  p.drawText(textRect.translated(halfWidth, 0), Qt::AlignCenter, rightHandDM ? confirmText : ignoreText);
-
-  p.restore();
 }
 
 void AnnotatedCameraWidget::drawStatusBar(QPainter &p) {

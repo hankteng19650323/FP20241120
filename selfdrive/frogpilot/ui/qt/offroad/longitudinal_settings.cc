@@ -458,7 +458,7 @@ FrogPilotLongitudinalPanel::FrogPilotLongitudinalPanel(FrogPilotSettingsWindow *
       });
       longitudinalToggle = reinterpret_cast<AbstractControl*>(manageSLCQOLBtn);
     } else if (param == "SLCLookaheadHigher" || param == "SLCLookaheadLower") {
-      longitudinalToggle = new FrogPilotParamValueControl(param, title, desc, icon, 0, 60, tr(" seconds"));
+      longitudinalToggle = new FrogPilotParamValueControl(param, title, desc, icon, 0, 30, tr(" seconds"));
     } else if (param == "Offset1" || param == "Offset2" || param == "Offset3" || param == "Offset4") {
       longitudinalToggle = new FrogPilotParamValueControl(param, title, desc, icon, -99, 99, tr("mph"));
 

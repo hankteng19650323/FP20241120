@@ -271,9 +271,9 @@ frogpilot_default_params: list[tuple[str, str | bytes]] = [
   ("Sidebar", "0"),
   ("SidebarMetrics", "1"),
   ("SignalMetrics", "0"),
-  ("SLCConfirmation", "1"),
-  ("SLCConfirmationHigher", "1"),
-  ("SLCConfirmationLower", "1"),
+  ("SLCConfirmation", "0"),
+  ("SLCConfirmationHigher", "0"),
+  ("SLCConfirmationLower", "0"),
   ("SLCFallback", "2"),
   ("SLCLookaheadHigher", "5"),
   ("SLCLookaheadLower", "5"),
@@ -284,6 +284,7 @@ frogpilot_default_params: list[tuple[str, str | bytes]] = [
   ("SNGHack", "1"),
   ("SpeedLimitChangedAlert", "1"),
   ("SpeedLimitController", "1"),
+  ("SpeedLimitSources", "0"),
   ("StartupMessageBottom", "so I do what I want 🐸"),
   ("StartupMessageTop", "Hippity hoppity this is my property"),
   ("StandardFollow", "1.45"),
@@ -607,6 +608,7 @@ class FrogPilotVariables:
     toggle.map_style = self.params.get_int("MapStyle") if toggle.navigation_ui else 0
     toggle.road_name_ui = toggle.navigation_ui and self.params.get_bool("RoadNameUI")
     toggle.show_speed_limit_offset = toggle.navigation_ui and self.params.get_bool("ShowSLCOffset")
+    toggle.speed_limit_sources = toggle.navigation_ui and self.params.get_bool("SpeedLimitSources")
     toggle.speed_limit_vienna = toggle.navigation_ui and self.params.get_bool("UseVienna")
 
     toggle.old_long_api = openpilot_longitudinal and car_make == "gm" and not self.params.get_bool("NewLongAPIGM")
@@ -883,6 +885,7 @@ class FrogPilotVariables:
       toggle.map_style = int(self.default_frogpilot_toggles.MapStyle) if toggle.navigation_ui else 0
       toggle.road_name_ui = bool(toggle.navigation_ui and self.default_frogpilot_toggles.RoadNameUI)
       toggle.show_speed_limit_offset = bool(toggle.navigation_ui and self.default_frogpilot_toggles.ShowSLCOffset)
+      toggle.speed_limit_sources = bool(toggle.navigation_ui and self.default_frogpilot_toggles.SpeedLimitSources)
       toggle.speed_limit_vienna = bool(toggle.navigation_ui and self.default_frogpilot_toggles.UseVienna)
 
       toggle.old_long_api = bool(openpilot_longitudinal and car_make == "gm" and not self.default_frogpilot_toggles.NewLongAPIGM)
@@ -935,7 +938,6 @@ class FrogPilotVariables:
       toggle.speed_limit_priority3 = self.default_frogpilot_toggles.SLCPriority3 if toggle.speed_limit_controller else None
       toggle.speed_limit_priority_highest = bool(toggle.speed_limit_priority1 == "Highest")
       toggle.speed_limit_priority_lowest = bool(toggle.speed_limit_priority1 == "Lowest")
-      toggle.speed_limit_vienna = bool(toggle.speed_limit_controller and self.default_frogpilot_toggles.UseVienna)
 
       toggle.startup_alert_top = str(self.default_frogpilot_toggles.StartupMessageTop)
       toggle.startup_alert_bottom = str(self.default_frogpilot_toggles.StartupMessageBottom)
@@ -1088,6 +1090,7 @@ class FrogPilotVariables:
       toggle.map_style = int(self.default_frogpilot_toggles.MapStyle) if toggle.navigation_ui else 0
       toggle.road_name_ui = bool(toggle.navigation_ui and self.default_frogpilot_toggles.RoadNameUI)
       toggle.show_speed_limit_offset = bool(toggle.navigation_ui and self.default_frogpilot_toggles.ShowSLCOffset)
+      toggle.speed_limit_sources = bool(toggle.navigation_ui and self.default_frogpilot_toggles.SpeedLimitSources)
       toggle.speed_limit_vienna = bool(toggle.navigation_ui and self.default_frogpilot_toggles.UseVienna)
 
       toggle.old_long_api = bool(openpilot_longitudinal and car_make == "gm" and not self.default_frogpilot_toggles.NewLongAPIGM)
@@ -1125,7 +1128,6 @@ class FrogPilotVariables:
       toggle.speed_limit_priority3 = self.default_frogpilot_toggles.SLCPriority3 if toggle.speed_limit_controller else None
       toggle.speed_limit_priority_highest = bool(toggle.speed_limit_priority1 == "Highest")
       toggle.speed_limit_priority_lowest = bool(toggle.speed_limit_priority1 == "Lowest")
-      toggle.speed_limit_vienna = bool(toggle.speed_limit_controller and self.default_frogpilot_toggles.UseVienna)
 
       toggle.startup_alert_top = str(self.default_frogpilot_toggles.StartupMessageTop)
       toggle.startup_alert_bottom = str(self.default_frogpilot_toggles.StartupMessageBottom)

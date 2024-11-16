@@ -62,7 +62,11 @@ public:
   void updateState(int alert_height, const UIState &s);
 
   MapSettingsButton *map_settings_btn;
+
+  // FrogPilot variables
   MapSettingsButton *map_settings_btn_bottom;
+
+  QRect newSpeedLimitRect;
 
 private:
   void drawText(QPainter &p, int x, int y, const QString &text, int alpha = 255, bool overridePen = false);
@@ -92,7 +96,6 @@ private:
   // FrogPilot widgets
   void drawLeadInfo(QPainter &p);
   void drawRadarTracks(QPainter &painter, const UIScene &scene);
-  void drawSLCConfirmation(QPainter &p);
   void drawStatusBar(QPainter &p);
   void drawTurnSignals(QPainter &p);
   void initializeFrogPilotWidgets();
@@ -108,7 +111,25 @@ private:
   PedalIcons *pedal_icons;
   ScreenRecorder *screenRecorder;
 
+  QElapsedTimer standstillTimer;
+
   QHBoxLayout *bottom_layout;
+
+  QPixmap dashboardIcon;
+  QPixmap navigationIcon;
+  QPixmap offlineMapsIcon;
+  QPixmap stopSignImg;
+  QPixmap upcomingMapsIcon;
+
+  QString accelerationUnit;
+  QString leadDistanceUnit;
+  QString leadSpeedUnit;
+  QString signalStyle;
+
+  QTimer *animationTimer;
+
+  QVector<QPixmap> blindspotImages;
+  QVector<QPixmap> signalImages;
 
   bool alwaysOnLateralActive;
   bool bigMapOpen;
@@ -129,6 +150,7 @@ private:
   bool slcOverridden;
   bool speedLimitChanged;
   bool speedLimitController;
+  bool speedLimitSources;
   bool trafficModeActive;
   bool turnSignalAnimation;
   bool turnSignalLeft;
@@ -156,8 +178,11 @@ private:
   int conditionalSpeed;
   int conditionalSpeedLead;
   int conditionalStatus;
+  int dashboardSpeedLimit;
   int desiredFollow;
+  int mapsSpeedLimit;
   int modelLength;
+  int navigationSpeedLimit;
   int obstacleDistance;
   int obstacleDistanceStock;
   int signalAnimationLength;
@@ -168,20 +193,9 @@ private:
   int statusBarHeight;
   int stoppedEquivalence;
   int totalFrames;
+  int upcomingSpeedLimit;
 
-  QElapsedTimer standstillTimer;
-
-  QPixmap stopSignImg;
-
-  QString accelerationUnit;
-  QString leadDistanceUnit;
-  QString leadSpeedUnit;
-  QString signalStyle;
-
-  QTimer *animationTimer;
-
-  QVector<QPixmap> blindspotImages;
-  QVector<QPixmap> signalImages;
+  std::string speedLimitSource;
 
   inline QColor blueColor(int alpha = 255) { return QColor(0, 150, 255, alpha); }
   inline QColor greenColor(int alpha = 242) { return QColor(23, 134, 68, alpha); }

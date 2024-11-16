@@ -123,14 +123,9 @@ void OnroadWindow::mousePressEvent(QMouseEvent* e) {
   // FrogPilot clickable widgets
   QPoint pos = e->pos();
 
-  QSize size = this->size();
-  QRect leftRect(0, 0, size.width() / 2, size.height());
-  QRect rightRect(size.width() / 2, 0, size.width() / 2, size.height());
-
-  if (scene.speed_limit_changed && (leftRect.contains(pos) || rightRect.contains(pos))) {
-    bool slcConfirmed = leftRect.contains(pos) ? !scene.right_hand_drive : scene.right_hand_drive;
-    paramsMemory.putBoolNonBlocking("SLCConfirmed", slcConfirmed);
-    paramsMemory.putBoolNonBlocking("SLCConfirmedPressed", true);
+  if (scene.speed_limit_changed && nvg->newSpeedLimitRect.contains(pos)) {
+    paramsMemory.putBool("SLCConfirmed", true);
+    paramsMemory.putBool("SLCConfirmedPressed", true);
     return;
   }
 
@@ -140,7 +135,7 @@ void OnroadWindow::mousePressEvent(QMouseEvent* e) {
 
       if (scene.conditional_experimental) {
         int override_value = (scene.conditional_status >= 1 && scene.conditional_status <= 6) ? 0 : (scene.conditional_status >= 7 ? 5 : 6);
-        paramsMemory.putIntNonBlocking("CEStatus", override_value);
+        paramsMemory.putInt("CEStatus", override_value);
       } else {
         params.putBoolNonBlocking("ExperimentalMode", !params.getBool("ExperimentalMode"));
       }

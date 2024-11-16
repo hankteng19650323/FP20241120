@@ -132,12 +132,15 @@ class FrogPilotPlanner:
 
     frogpilotPlan.redLight = bool(self.cem.stop_light_detected)
 
+    frogpilotPlan.slcMapSpeedLimit = self.frogpilot_vcruise.slc.map_speed_limit
     frogpilotPlan.slcOverridden = bool(self.frogpilot_vcruise.override_slc)
     frogpilotPlan.slcOverriddenSpeed = float(self.frogpilot_vcruise.overridden_speed)
     frogpilotPlan.slcSpeedLimit = self.frogpilot_vcruise.slc_target
     frogpilotPlan.slcSpeedLimitOffset = self.frogpilot_vcruise.slc.offset
+    frogpilotPlan.slcSpeedLimitSource = self.frogpilot_vcruise.slc.source
     frogpilotPlan.speedLimitChanged = self.frogpilot_vcruise.speed_limit_changed
     frogpilotPlan.unconfirmedSlcSpeedLimit = self.frogpilot_vcruise.slc.desired_speed_limit
+    frogpilotPlan.upcomingSLCSpeedLimit = self.frogpilot_vcruise.slc.upcoming_speed_limit
 
     frogpilotPlan.togglesUpdated = toggles_updated
 

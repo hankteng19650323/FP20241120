@@ -81,7 +81,7 @@ class FrogPilotVCruise:
       self.slc.update(frogpilotCarState.dashboardSpeedLimit, controlsState.enabled, frogpilotNavigation.navigationSpeedLimit, v_cruise, v_ego, frogpilot_toggles)
       unconfirmed_slc_target = self.slc.desired_speed_limit
 
-      if (frogpilot_toggles.speed_limit_changed_alert or frogpilot_toggles.speed_limit_confirmation_lower or frogpilot_toggles.speed_limit_confirmation_higher) and self.slc_target != 0:
+      if (frogpilot_toggles.speed_limit_changed_alert or frogpilot_toggles.speed_limit_confirmation) and self.slc_target != 0:
         self.speed_limit_changed = unconfirmed_slc_target != self.previous_speed_limit and abs(self.slc_target - unconfirmed_slc_target) > 1 and unconfirmed_slc_target > 1
 
         speed_limit_decreased = self.speed_limit_changed and self.slc_target > unconfirmed_slc_target
@@ -91,7 +91,7 @@ class FrogPilotVCruise:
         denied_via_ui = self.params_memory.get_bool("SLCConfirmedPressed") and not self.params_memory.get_bool("SLCConfirmed")
 
         speed_limit_accepted = frogpilotCarControl.resumePressed or accepted_via_ui
-        speed_limit_denied = any(be.type == ButtonType.decelCruise for be in carState.buttonEvents) or denied_via_ui or self.speed_limit_timer >= 10
+        speed_limit_denied = any(be.type == ButtonType.decelCruise for be in carState.buttonEvents) or denied_via_ui or self.speed_limit_timer >= 30
 
         if speed_limit_accepted or speed_limit_denied:
           self.previous_speed_limit = unconfirmed_slc_target
