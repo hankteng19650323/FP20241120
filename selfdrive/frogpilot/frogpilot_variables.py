@@ -115,7 +115,6 @@ frogpilot_default_params: list[tuple[str, str | bytes]] = [
   ("DeveloperUI", "0"),
   ("DeviceManagement", "1"),
   ("DeviceShutdown", "9"),
-  ("DisableCurveSpeedSmoothing", "0"),
   ("DisableOnroadUploads", "0"),
   ("DisableOpenpilotLongitudinal", "0"),
   ("DisengageVolume", "101"),
@@ -155,6 +154,7 @@ frogpilot_default_params: list[tuple[str, str | bytes]] = [
   ("HideMapIcon", "0"),
   ("HideMaxSpeed", "0"),
   ("HideSpeed", "0"),
+  ("HideSpeedLimit", "0"),
   ("HolidayThemes", "1"),
   ("HumanAcceleration", "1"),
   ("HumanFollowing", "1"),
@@ -379,11 +379,12 @@ class FrogPilotVariables:
     speed_conversion = CV.KPH_TO_MS if toggle.is_metric else CV.MPH_TO_MS
 
     toggle.advanced_custom_onroad_ui = self.params.get_bool("AdvancedCustomUI")
+    toggle.hide_alerts = toggle.advanced_custom_onroad_ui and self.params.get_bool("HideAlerts")
     toggle.hide_lead_marker = toggle.advanced_custom_onroad_ui and self.params.get_bool("HideLeadMarker")
-    toggle.hide_speed = toggle.advanced_custom_onroad_ui and self.params.get_bool("HideSpeed")
     toggle.hide_map_icon = toggle.advanced_custom_onroad_ui and self.params.get_bool("HideMapIcon")
     toggle.hide_max_speed = toggle.advanced_custom_onroad_ui and self.params.get_bool("HideMaxSpeed")
-    toggle.hide_alerts = toggle.advanced_custom_onroad_ui and self.params.get_bool("HideAlerts")
+    toggle.hide_speed = toggle.advanced_custom_onroad_ui and self.params.get_bool("HideSpeed")
+    toggle.hide_speed_limit = toggle.advanced_custom_onroad_ui and self.params.get_bool("HideSpeedLimit")
     toggle.use_wheel_speed = toggle.advanced_custom_onroad_ui and self.params.get_bool("WheelSpeed")
 
     toggle.advanced_lateral_tuning = self.params.get_bool("AdvancedLateralTune")
@@ -447,7 +448,6 @@ class FrogPilotVariables:
     toggle.curve_speed_controller = openpilot_longitudinal and self.params.get_bool("CurveSpeedControl")
     toggle.curve_sensitivity = self.params.get_int("CurveSensitivity") / 100 if toggle.curve_speed_controller else 1
     toggle.turn_aggressiveness = self.params.get_int("TurnAggressiveness") / 100 if toggle.curve_speed_controller else 1
-    toggle.disable_curve_speed_smoothing = toggle.curve_speed_controller and self.params.get_bool("DisableCurveSpeedSmoothing")
     toggle.map_turn_speed_controller = toggle.curve_speed_controller and self.params.get_bool("MTSCEnabled")
     toggle.mtsc_curvature_check = toggle.map_turn_speed_controller and self.params.get_bool("MTSCCurvatureCheck")
     toggle.vision_turn_controller = toggle.curve_speed_controller and self.params.get_bool("VisionTurnControl")
@@ -697,11 +697,12 @@ class FrogPilotVariables:
 
     if customization_level == 0:
       toggle.advanced_custom_onroad_ui = bool(self.default_frogpilot_toggles.AdvancedCustomUI)
+      toggle.hide_alerts = bool(toggle.advanced_custom_onroad_ui and self.default_frogpilot_toggles.HideAlerts)
       toggle.hide_lead_marker = bool(toggle.advanced_custom_onroad_ui and self.default_frogpilot_toggles.HideLeadMarker)
-      toggle.hide_speed = bool(toggle.advanced_custom_onroad_ui and self.default_frogpilot_toggles.HideSpeed)
       toggle.hide_map_icon = bool(toggle.advanced_custom_onroad_ui and self.default_frogpilot_toggles.HideMapIcon)
       toggle.hide_max_speed = bool(toggle.advanced_custom_onroad_ui and self.default_frogpilot_toggles.HideMaxSpeed)
-      toggle.hide_alerts = bool(toggle.advanced_custom_onroad_ui and self.default_frogpilot_toggles.HideAlerts)
+      toggle.hide_speed = bool(toggle.advanced_custom_onroad_ui and self.default_frogpilot_toggles.HideSpeed)
+      toggle.hide_speed_limit = bool(toggle.advanced_custom_onroad_ui and self.default_frogpilot_toggles.HideSpeedLimit)
       toggle.use_wheel_speed = bool(toggle.advanced_custom_onroad_ui and self.default_frogpilot_toggles.WheelSpeed)
 
       toggle.advanced_lateral_tuning = bool(self.default_frogpilot_toggles.AdvancedLateralTune)
@@ -753,7 +754,6 @@ class FrogPilotVariables:
       toggle.curve_speed_controller = bool(openpilot_longitudinal and self.default_frogpilot_toggles.CurveSpeedControl)
       toggle.curve_sensitivity = int(self.default_frogpilot_toggles.CurveSensitivity) / 100 if toggle.curve_speed_controller else 1
       toggle.turn_aggressiveness = int(self.default_frogpilot_toggles.TurnAggressiveness) / 100 if toggle.curve_speed_controller else 1
-      toggle.disable_curve_speed_smoothing = bool(toggle.curve_speed_controller and self.default_frogpilot_toggles.DisableCurveSpeedSmoothing)
       toggle.map_turn_speed_controller = bool(toggle.curve_speed_controller and self.default_frogpilot_toggles.MTSCEnabled)
       toggle.mtsc_curvature_check = bool(toggle.map_turn_speed_controller and self.default_frogpilot_toggles.MTSCCurvatureCheck)
       toggle.vision_turn_controller = bool(toggle.curve_speed_controller and self.default_frogpilot_toggles.VisionTurnControl)
@@ -946,11 +946,12 @@ class FrogPilotVariables:
 
     elif customization_level != 2:
       toggle.advanced_custom_onroad_ui = bool(self.default_frogpilot_toggles.AdvancedCustomUI)
+      toggle.hide_alerts = bool(toggle.advanced_custom_onroad_ui and self.default_frogpilot_toggles.HideAlerts)
       toggle.hide_lead_marker = bool(toggle.advanced_custom_onroad_ui and self.default_frogpilot_toggles.HideLeadMarker)
-      toggle.hide_speed = bool(toggle.advanced_custom_onroad_ui and self.default_frogpilot_toggles.HideSpeed)
       toggle.hide_map_icon = bool(toggle.advanced_custom_onroad_ui and self.default_frogpilot_toggles.HideMapIcon)
       toggle.hide_max_speed = bool(toggle.advanced_custom_onroad_ui and self.default_frogpilot_toggles.HideMaxSpeed)
-      toggle.hide_alerts = bool(toggle.advanced_custom_onroad_ui and self.default_frogpilot_toggles.HideAlerts)
+      toggle.hide_speed = bool(toggle.advanced_custom_onroad_ui and self.default_frogpilot_toggles.HideSpeed)
+      toggle.hide_speed_limit = bool(toggle.advanced_custom_onroad_ui and self.default_frogpilot_toggles.HideSpeedLimit)
       toggle.use_wheel_speed = bool(toggle.advanced_custom_onroad_ui and self.default_frogpilot_toggles.WheelSpeed)
 
       toggle.advanced_lateral_tuning = bool(self.default_frogpilot_toggles.AdvancedLateralTune)

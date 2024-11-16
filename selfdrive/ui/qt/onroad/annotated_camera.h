@@ -140,6 +140,7 @@ private:
   bool hideMapIcon;
   bool hideMaxSpeed;
   bool hideSpeed;
+  bool hideSpeedLimit;
   bool leadInfo;
   bool mapOpen;
   bool onroadDistanceButton;
@@ -163,7 +164,7 @@ private:
   double currentAcceleration;
 
   float accelerationConversion;
-  float cruiseAdjustment;
+  float curveSpeed;
   float distanceConversion;
   float laneDetectionWidth;
   float lead_x;

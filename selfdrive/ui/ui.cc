@@ -397,7 +397,6 @@ void ui_update_frogpilot_params(UIState *s) {
   scene.conditional_limit = scene.frogpilot_toggles.value("conditional_limit").toDouble();
   scene.conditional_limit_lead = scene.frogpilot_toggles.value("conditional_limit_lead").toDouble();
   scene.cpu_metrics = scene.frogpilot_toggles.value("cpu_metrics").toBool();
-  scene.disable_curve_speed_smoothing = scene.frogpilot_toggles.value("disable_curve_speed_smoothing").toBool();
   scene.driver_camera_in_reverse = scene.frogpilot_toggles.value("driver_camera_in_reverse").toBool();
   scene.dynamic_path_width = scene.frogpilot_toggles.value("dynamic_path_width").toBool();
   scene.dynamic_pedals_on_ui = scene.frogpilot_toggles.value("dynamic_pedals_on_ui").toBool();
@@ -410,6 +409,7 @@ void ui_update_frogpilot_params(UIState *s) {
   scene.hide_map_icon = scene.frogpilot_toggles.value("hide_map_icon").toBool();
   scene.hide_max_speed = scene.frogpilot_toggles.value("hide_max_speed").toBool();
   scene.hide_speed = scene.frogpilot_toggles.value("hide_speed").toBool();
+  scene.hide_speed_limit = scene.frogpilot_toggles.value("hide_speed_limit").toBool();
   scene.ip_metrics = scene.frogpilot_toggles.value("ip_metrics").toBool();
   scene.jerk_metrics = scene.frogpilot_toggles.value("jerk_metrics").toBool();
   scene.lateral_tuning_metrics = scene.has_auto_tune && scene.frogpilot_toggles.value("lateral_tuning_metrics").toBool();

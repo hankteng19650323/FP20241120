@@ -16,7 +16,6 @@ FrogPilotLongitudinalPanel::FrogPilotLongitudinalPanel(FrogPilotSettingsWindow *
     {"MTSCCurvatureCheck", tr("Curve Detection Failsafe"), tr("Triggers 'Curve Speed Control' only when a curve is detected with the model as well when using the 'Map Based' method."), ""},
     {"CurveSensitivity", tr("Curve Detection Sensitivity"), tr("Controls how sensitive openpilot is to detecting curves. Higher values trigger earlier responses at the risk of triggering too often, while lower values increase confidence at the risk of triggering too infrequently."), ""},
     {"TurnAggressiveness", tr("Speed Aggressiveness"), tr("Controls how aggressive openpilot takes turns. Higher values result in faster turns, while lower values result in slower turns."), ""},
-    {"DisableCurveSpeedSmoothing", tr("Disable Speed Value Smoothing In the UI"), tr("Speed value smoothing is disabled in the UI to instead display the exact speed requested by the curve control."), ""},
 
     {"CustomPersonalities", tr("Customize Driving Personalities"), tr("Customize the personality profiles to suit your driving style."), "../frogpilot/assets/toggle_icons/icon_personality.png"},
     {"TrafficPersonalityProfile", tr("Traffic Personality"), tr("Customizes the 'Traffic' personality profile, tailored for navigating through traffic."), "../frogpilot/assets/stock_theme/distance_icons/traffic.png"},

@@ -15,6 +15,7 @@ FrogPilotVisualsPanel::FrogPilotVisualsPanel(FrogPilotSettingsWindow *parent) : 
     {"HideMapIcon", tr("Hide Map Icon"), tr("Hides the map icon."), ""},
     {"HideMaxSpeed", tr("Hide Max Speed"), tr("Hides the max speed."), ""},
     {"HideAlerts", tr("Hide Non-Critical Alerts"), tr("Hides non-critical alerts."), ""},
+    {"HideSpeedLimit", tr("Hide Speed Limits"), tr("Hides the speed limits."), ""},
     {"WheelSpeed", tr("Use Wheel Speed"), tr("Uses the wheel speed instead of the cluster speed. This is purely a visual change and doesn't impact how openpilot drives."), ""},
 
     {"DeveloperUI", tr("Developer Metrics"), tr("Show detailed information about openpilot's internal operations."), "../assets/offroad/icon_shell.png"},

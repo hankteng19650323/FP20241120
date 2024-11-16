@@ -35,8 +35,8 @@ private:
   };
 
   std::set<QString> curveSpeedKeys = {
-    "CurveDetectionMethod", "CurveSensitivity", "DisableCurveSpeedSmoothing",
-    "MTSCCurvatureCheck", "TurnAggressiveness"
+    "CurveDetectionMethod", "CurveSensitivity", "MTSCCurvatureCheck",
+    "TurnAggressiveness"
   };
 
   std::set<QString> customDrivingPersonalityKeys = {
