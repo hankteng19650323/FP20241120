@@ -32,7 +32,7 @@ from openpilot.selfdrive.controls.lib.vehicle_model import VehicleModel
 from openpilot.system.hardware import HARDWARE
 
 from openpilot.selfdrive.frogpilot.controls.lib.frogpilot_acceleration import get_max_allowed_accel
-from openpilot.selfdrive.frogpilot.frogpilot_variables import NON_DRIVING_GEARS, get_frogpilot_toggles
+from openpilot.selfdrive.frogpilot.frogpilot_variables import NON_DRIVING_GEARS, get_frogpilot_toggles, params_memory
 
 SOFT_DISABLE_TIME = 3  # seconds
 LDW_MIN_SPEED = 31 * CV.MPH_TO_MS
@@ -181,8 +181,6 @@ class Controls:
 
     # FrogPilot variables
     self.frogpilot_toggles = get_frogpilot_toggles()
-
-    self.params_memory = Params("/dev/shm/params")
 
     self.always_on_lateral_active = False
     self.always_on_lateral_active_previously = False
@@ -709,11 +707,11 @@ class Controls:
     if self.CP.openpilotLongitudinalControl:
       if any(not be.pressed and be.type == ButtonType.gapAdjustCruise for be in CS.buttonEvents) or self.onroad_distance_pressed:
         menu_open = self.display_timer > 0 or not self.sm['frogpilotCarState'].hasMenu
-        if not (self.sm['frogpilotCarState'].distanceLongPressed or self.params_memory.get_bool("OnroadDistanceButtonPressed")) and menu_open:
+        if not (self.sm['frogpilotCarState'].distanceLongPressed or params_memory.get_bool("OnroadDistanceButtonPressed")) and menu_open:
           self.personality = (self.personality - 1) % 3
           self.params.put_nonblocking('LongitudinalPersonality', str(self.personality))
         self.display_timer = 350
-      self.onroad_distance_pressed = self.params_memory.get_bool("OnroadDistanceButtonPressed")
+      self.onroad_distance_pressed = params_memory.get_bool("OnroadDistanceButtonPressed")
 
     self.display_timer -= 1
 
@@ -737,9 +735,9 @@ class Controls:
     if any(be.pressed and be.type == FrogPilotButtonType.lkas for be in CS.buttonEvents):
       if self.frogpilot_toggles.experimental_mode_via_lkas and self.enabled:
         if self.frogpilot_toggles.conditional_experimental_mode:
-          conditional_status = self.params_memory.get_int("CEStatus")
+          conditional_status = params_memory.get_int("CEStatus")
           override_value = 0 if conditional_status in {1, 2, 3, 4, 5, 6} else 3 if conditional_status >= 7 else 4
-          self.params_memory.put_int("CEStatus", override_value)
+          params_memory.put_int("CEStatus", override_value)
         else:
           self.experimental_mode = not self.experimental_mode
           self.params.put_bool_nonblocking("ExperimentalMode", self.experimental_mode)

@@ -1,13 +1,9 @@
-from openpilot.common.params import Params
-
 from openpilot.selfdrive.frogpilot.frogpilot_utilities import MovingAverageCalculator
-from openpilot.selfdrive.frogpilot.frogpilot_variables import CITY_SPEED_LIMIT, CRUISING_SPEED, THRESHOLD
+from openpilot.selfdrive.frogpilot.frogpilot_variables import CITY_SPEED_LIMIT, CRUISING_SPEED, THRESHOLD, params_memory
 
 class ConditionalExperimentalMode:
   def __init__(self, FrogPilotPlanner):
     self.frogpilot_planner = FrogPilotPlanner
-
-    self.params_memory = Params("/dev/shm/params")
 
     self.curvature_mac = MovingAverageCalculator()
     self.stop_light_mac = MovingAverageCalculator()
@@ -18,14 +14,14 @@ class ConditionalExperimentalMode:
 
   def update(self, carState, frogpilotCarState, frogpilotNavigation, modelData, v_ego, v_lead, frogpilot_toggles):
     if frogpilot_toggles.experimental_mode_via_press:
-      self.status_value = self.params_memory.get_int("CEStatus")
+      self.status_value = params_memory.get_int("CEStatus")
     else:
       self.status_value = 0
 
     if self.status_value not in {1, 2, 3, 4, 5, 6} and not carState.standstill:
       self.update_conditions(frogpilotCarState, self.frogpilot_planner.tracking_lead, v_ego, v_lead, frogpilot_toggles)
       self.experimental_mode = self.check_conditions(carState, frogpilotNavigation, modelData, self.frogpilot_planner.frogpilot_following.following_lead, v_ego, v_lead, frogpilot_toggles)
-      self.params_memory.put_int("CEStatus", self.status_value if self.experimental_mode else 0)
+      params_memory.put_int("CEStatus", self.status_value if self.experimental_mode else 0)
     else:
       self.experimental_mode = self.status_value in {2, 4, 6} or carState.standstill and self.experimental_mode
       self.stop_light_detected &= self.status_value not in {1, 2, 3, 4, 5, 6}

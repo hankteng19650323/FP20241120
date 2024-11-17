@@ -12,7 +12,7 @@ from openpilot.common.conversions import Conversions as CV
 from openpilot.system.hardware import HARDWARE
 from openpilot.system.loggerd.config import get_available_bytes, get_used_bytes
 
-from openpilot.selfdrive.frogpilot.frogpilot_utilities import update_frogpilot_toggles
+from openpilot.selfdrive.frogpilot.frogpilot_variables import params, params_memory, params_tracking, update_frogpilot_toggles
 
 def is_running_on_comma():
   return os.path.exists("/data/persist")
@@ -27,19 +27,11 @@ CAR_VALUES_PATH = f"{DIR_OF_THIS_FILE}/../../car"
 if RUNNING_ON_COMMA:
   # Do this to import the car modules. Let me know if there is a better way.
   sys.path.append(f"{DIR_OF_THIS_FILE}/../..") # Adds higher directory to python modules path.
-  from common.params import Params
-  params = Params()
-  params_memory = Params("/dev/shm/params")
-  params_tracking = Params("/persist/tracking")
 else:
   # If running this on a computer, there is a bunch of fake stuff inside fixtures that
   # will substitute openpilot stuff
   DATA_PATH = f"{DIR_OF_THIS_FILE}/fixtures"
   CAR_VALUES_PATH = f"{DIR_OF_THIS_FILE}/fixtures/selfdrive_car"
-  from .fixtures.fake_modules.params import Params
-  params = Params()
-  params_memory = params
-  params_tracking = params
 
 SCREENRECORD_PATH = f"{DATA_PATH}/data/media/screen_recordings/"
 ERROR_LOGS_PATH = f"{DATA_PATH}/data/crashes/"
@@ -171,7 +163,7 @@ def get_settings_value(setting: dict) -> None:
       get_settings_value(toggle)
 
 
-def find_setting(key, params):
+def find_setting(key):
   """
   Find a setting in the params array by key. Searches subsettings and toggles as
   well, recursivly

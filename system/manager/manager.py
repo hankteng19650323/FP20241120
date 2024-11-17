@@ -20,7 +20,7 @@ from openpilot.common.swaglog import cloudlog, add_file_handler
 from openpilot.system.version import get_build_metadata, terms_version, training_version
 
 from openpilot.selfdrive.frogpilot.frogpilot_functions import convert_params, frogpilot_boot_functions, setup_frogpilot, uninstall_frogpilot
-from openpilot.selfdrive.frogpilot.frogpilot_variables import FrogPilotVariables, frogpilot_default_params, get_frogpilot_toggles
+from openpilot.selfdrive.frogpilot.frogpilot_variables import FrogPilotVariables, frogpilot_default_params, get_frogpilot_toggles, params_memory, params_storage
 
 
 def manager_init() -> None:
@@ -30,7 +30,6 @@ def manager_init() -> None:
 
   params = Params()
   setup_frogpilot(build_metadata, params)
-  params_storage = Params("/persist/params")
   params.clear_all(ParamKeyType.CLEAR_ON_MANAGER_START)
   params.clear_all(ParamKeyType.CLEAR_ON_ONROAD_TRANSITION)
   params.clear_all(ParamKeyType.CLEAR_ON_OFFROAD_TRANSITION)
@@ -169,8 +168,6 @@ def manager_thread() -> None:
   started_prev = False
 
   # FrogPilot variables
-  params_memory = Params("/dev/shm/params")
-
   FrogPilotVariables().update(False)
   frogpilot_toggles = get_frogpilot_toggles()
 
