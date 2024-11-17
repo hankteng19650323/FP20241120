@@ -247,6 +247,7 @@ void AnnotatedCameraWidget::drawHud(QPainter &p) {
     p.setPen(QPen(blackColor(), 6));
     p.drawRoundedRect(sign_rect.adjusted(9, 9, -9, -9), 16, 16);
 
+    p.save();
     p.setOpacity(slcOverridden ? 0.25 : 1.0);
     if (speedLimitController && showSLCOffset && !slcOverridden) {
       p.setFont(InterFont(28, QFont::DemiBold));
@@ -262,10 +263,11 @@ void AnnotatedCameraWidget::drawHud(QPainter &p) {
       p.setFont(InterFont(70, QFont::Bold));
       p.drawText(sign_rect.adjusted(0, 85, 0, 0), Qt::AlignTop | Qt::AlignHCenter, speedLimitStr);
     }
+    p.restore();
 
     if (speedLimitChanged) {
       QRect new_sign_rect = sign_rect.translated(sign_rect.width() + 25, 0);
-      new_sign_rect.setWidth(223);
+      new_sign_rect.setWidth(newSpeedLimitStr.size() >= 3 ? 200 : 175);
 
       newSpeedLimitRect = new_sign_rect;
       newSpeedLimitRect.setWidth(new_sign_rect.width());
@@ -277,7 +279,6 @@ void AnnotatedCameraWidget::drawHud(QPainter &p) {
       p.setPen(flashPenColor);
       p.drawRoundedRect(new_sign_rect.adjusted(9, 9, -9, -9), 16, 16);
 
-      p.setOpacity(1.0);
       p.setFont(InterFont(28, QFont::DemiBold));
       p.drawText(new_sign_rect.adjusted(0, 22, 0, 0), Qt::AlignTop | Qt::AlignHCenter, tr("PENDING"));
       p.drawText(new_sign_rect.adjusted(0, 51, 0, 0), Qt::AlignTop | Qt::AlignHCenter, tr("LIMIT"));
@@ -349,7 +350,7 @@ void AnnotatedCameraWidget::drawHud(QPainter &p) {
       p.setRenderHint(QPainter::Antialiasing);
       p.drawPixmap(iconRect, icon);
 
-      p.setFont(InterFont(40, QFont::DemiBold));
+      p.setFont(InterFont(35, QFont::DemiBold));
       p.setPen(QPen(whiteColor(), 6));
       QRect textRect(iconRect.right() + 10, rect.y(), rect.width() - iconRect.width() - 30, rect.height());
       p.drawText(textRect, Qt::AlignVCenter | Qt::AlignLeft, fullText);

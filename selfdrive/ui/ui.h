@@ -238,6 +238,7 @@ typedef struct UIScene {
   float acceleration_jerk;
   float acceleration_jerk_difference;
   float adjusted_cruise;
+  float dashboard_speed_limit;
   float friction;
   float lane_detection_width;
   float lane_line_width;
@@ -245,6 +246,7 @@ typedef struct UIScene {
   float lane_width_right;
   float lat_accel;
   float lead_detection_probability;
+  float navigation_speed_limit;
   float path_edge_width;
   float path_width;
   float road_edge_width;
@@ -256,19 +258,18 @@ typedef struct UIScene {
   float speed_limit_overridden_speed;
   float steer;
   float unconfirmed_speed_limit;
+  float upcoming_speed_limit;
 
   int bearing_deg;
   int camera_view;
   int conditional_limit;
   int conditional_limit_lead;
   int conditional_status;
-  int dashboard_speed_limit;
   int desired_follow;
   int driver_camera_timer;
   int map_style;
   int minimum_lane_change_speed;
   int model_length;
-  int navigation_speed_limit;
   int obstacle_distance;
   int obstacle_distance_stock;
   int screen_brightness;
@@ -279,7 +280,6 @@ typedef struct UIScene {
   int steering_angle_deg;
   int stopped_equivalence;
   int tethering_config;
-  int upcoming_speed_limit;
 
   std::string speed_limit_source;
 

@@ -165,13 +165,17 @@ private:
 
   float accelerationConversion;
   float curveSpeed;
+  float dashboardSpeedLimit;
   float distanceConversion;
   float laneDetectionWidth;
   float lead_x;
   float lead_y;
+  float mapsSpeedLimit;
+  float navigationSpeedLimit;
   float slcSpeedLimitOffset;
   float speedConversion;
   float unconfirmedSpeedLimit;
+  float upcomingSpeedLimit;
 
   int alertHeight;
   int animationFrameIndex;
@@ -179,11 +183,8 @@ private:
   int conditionalSpeed;
   int conditionalSpeedLead;
   int conditionalStatus;
-  int dashboardSpeedLimit;
   int desiredFollow;
-  int mapsSpeedLimit;
   int modelLength;
-  int navigationSpeedLimit;
   int obstacleDistance;
   int obstacleDistanceStock;
   int signalAnimationLength;
@@ -194,7 +195,6 @@ private:
   int statusBarHeight;
   int stoppedEquivalence;
   int totalFrames;
-  int upcomingSpeedLimit;
 
   std::string speedLimitSource;
 
