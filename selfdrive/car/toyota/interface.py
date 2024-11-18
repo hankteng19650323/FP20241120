@@ -157,7 +157,6 @@ class CarInterface(CarInterfaceBase):
 
       # Since we compensate for imprecise acceleration in carcontroller and error correct on aEgo, we can avoid using gains
       if ret.flags & ToyotaFlags.RAISED_ACCEL_LIMIT:
-        tune.kiV = [0.25]
         tune.kiV = [0.0]
     else:
       tune.kiBP = [0., 5., 35.]

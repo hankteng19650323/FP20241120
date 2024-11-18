@@ -111,8 +111,6 @@ private:
   PedalIcons *pedal_icons;
   ScreenRecorder *screenRecorder;
 
-  QElapsedTimer standstillTimer;
-
   QHBoxLayout *bottom_layout;
 
   QPixmap dashboardIcon;

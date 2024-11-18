@@ -82,7 +82,7 @@ class Car:
     # FrogPilot variables
     self.frogpilot_toggles = get_frogpilot_toggles()
 
-    if self.params.get_bool("AlwaysOnLateral"):
+    if self.frogpilot_toggles.always_on_lateral:
       self.CP.alternativeExperience |= ALTERNATIVE_EXPERIENCE.ALWAYS_ON_LATERAL
       self.CP.alternativeExperience |= ALTERNATIVE_EXPERIENCE.DISABLE_DISENGAGE_ON_GAS
 

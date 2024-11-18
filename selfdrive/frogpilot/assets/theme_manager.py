@@ -242,7 +242,6 @@ class ThemeManager:
     if theme_changed:
       if current_holiday_theme:
         self.previous_assets["holiday_theme"] = current_holiday_theme
-      params_memory.put_bool("ThemeUpdated", True)
       update_frogpilot_toggles()
 
   def extract_zip(self, zip_file, extract_path):
@@ -250,7 +249,7 @@ class ThemeManager:
     with zipfile.ZipFile(zip_file, 'r') as zip_ref:
       zip_ref.extractall(extract_path)
     os.remove(zip_file)
-    print(f"Extraction completed and zip file deleted.")
+    print(f"Extraction completed and zip file deleted")
 
   def handle_existing_theme(self, theme_name, theme_param):
     print(f"Theme {theme_name} already exists, skipping download...")
@@ -336,7 +335,7 @@ class ThemeManager:
       return sorted(set(assets) - existing_themes)
 
     params.put("DownloadableColors", ','.join(filter_existing_assets(downloadable_colors, "colors")))
-    print("Colors list updated successfully.")
+    print("Colors list updated successfully")
 
     distance_icons_directory = os.path.join(THEME_SAVE_PATH, "distance_icons")
     params.put("DownloadableDistanceIcons", ','.join(sorted(set(downloadable_distance_icons) - {
@@ -346,13 +345,13 @@ class ThemeManager:
     )
 
     params.put("DownloadableIcons", ','.join(filter_existing_assets(downloadable_icons, "icons")))
-    print("Icons list updated successfully.")
+    print("Icons list updated successfully")
 
     params.put("DownloadableSignals", ','.join(filter_existing_assets(downloadable_signals, "signals")))
-    print("Signals list updated successfully.")
+    print("Signals list updated successfully")
 
     params.put("DownloadableSounds", ','.join(filter_existing_assets(downloadable_sounds, "sounds")))
-    print("Sounds list updated successfully.")
+    print("Sounds list updated successfully")
 
     wheel_directory = os.path.join(THEME_SAVE_PATH, "steering_wheels")
     params.put("DownloadableWheels", ','.join(sorted(set(downloadable_wheels) - {

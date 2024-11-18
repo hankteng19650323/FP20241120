@@ -88,8 +88,8 @@ class FrogPilotVCruise:
         accepted_via_ui = params_memory.get_bool("SLCConfirmedPressed") and params_memory.get_bool("SLCConfirmed")
         denied_via_ui = params_memory.get_bool("SLCConfirmedPressed") and not params_memory.get_bool("SLCConfirmed")
 
-        speed_limit_accepted = frogpilotCarControl.resumePressed or accepted_via_ui
-        speed_limit_denied = any(be.type == ButtonType.decelCruise for be in carState.buttonEvents) or denied_via_ui or self.speed_limit_timer >= 30
+        speed_limit_accepted = frogpilotCarControl.resumePressed and controlsState.enabled or accepted_via_ui
+        speed_limit_denied = any(be.type == ButtonType.decelCruise for be in carState.buttonEvents) and controlsState.enabled or denied_via_ui or self.speed_limit_timer >= 30
 
         if speed_limit_accepted or speed_limit_denied:
           self.previous_speed_limit = unconfirmed_slc_target

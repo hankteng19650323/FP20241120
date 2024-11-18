@@ -26,7 +26,7 @@ class SpeedLimitController:
     self.offset = self.get_offset(frogpilot_toggles)
     self.desired_speed_limit = self.get_desired_speed_limit()
 
-    self.experimental_mode = self.speed_limit == 0 and frogpilot_toggles.slc_fallback_experimental_mode
+    self.experimental_mode = frogpilot_toggles.slc_fallback_experimental_mode and self.speed_limit == 0
 
   def get_desired_speed_limit(self):
     if self.speed_limit > 1:
@@ -40,8 +40,8 @@ class SpeedLimitController:
     self.map_speed_limit = params_memory.get_float("MapSpeedLimit")
 
     next_map_speed_limit = json.loads(params_memory.get("NextMapSpeedLimit", "{}"))
-    next_map_speed_limit_lat = next_map_speed_limit.get("latitude", 0)
-    next_map_speed_limit_lon = next_map_speed_limit.get("longitude", 0)
+    next_lat = next_map_speed_limit.get("latitude", 0)
+    next_lon = next_map_speed_limit.get("longitude", 0)
     self.upcoming_speed_limit = next_map_speed_limit.get("speedlimit", 0)
 
     position = json.loads(params_memory.get("LastGPSPosition", "{}"))
@@ -49,14 +49,14 @@ class SpeedLimitController:
     lon = position.get("longitude", 0)
 
     if self.upcoming_speed_limit > 1:
-      d = calculate_distance_to_point(lat * TO_RADIANS, lon * TO_RADIANS, next_map_speed_limit_lat * TO_RADIANS, next_map_speed_limit_lon * TO_RADIANS)
+      distance = calculate_distance_to_point(lat * TO_RADIANS, lon * TO_RADIANS, next_lat * TO_RADIANS, next_lon * TO_RADIANS)
 
       if self.previous_speed_limit < self.upcoming_speed_limit:
-        max_d = frogpilot_toggles.map_speed_lookahead_higher * v_ego
+        max_distance = frogpilot_toggles.map_speed_lookahead_higher * v_ego
       else:
-        max_d = frogpilot_toggles.map_speed_lookahead_lower * v_ego
+        max_distance = frogpilot_toggles.map_speed_lookahead_lower * v_ego
 
-      if d < max_d:
+      if distance < max_distance:
         self.map_speed_limit = self.upcoming_speed_limit
 
   def get_offset(self, frogpilot_toggles):
@@ -76,20 +76,19 @@ class SpeedLimitController:
     }
     filtered_limits = {source: float(limit) for source, limit in limits.items() if limit > 1}
 
-    if frogpilot_toggles.speed_limit_priority_highest and filtered_limits:
-      selected_source = max(filtered_limits, key=filtered_limits.get)
-      self.source = selected_source
-      return filtered_limits[selected_source]
+    if filtered_limits:
+      if frogpilot_toggles.speed_limit_priority_highest:
+        self.source = max(filtered_limits, key=filtered_limits.get)
+        return filtered_limits[self.source]
 
-    if frogpilot_toggles.speed_limit_priority_lowest and filtered_limits:
-      selected_source = min(filtered_limits, key=filtered_limits.get)
-      self.source = selected_source
-      return filtered_limits[selected_source]
+      if frogpilot_toggles.speed_limit_priority_lowest:
+        self.source = min(filtered_limits, key=filtered_limits.get)
+        return filtered_limits[self.source]
 
-    for priority in [frogpilot_toggles.speed_limit_priority1, frogpilot_toggles.speed_limit_priority2, frogpilot_toggles.speed_limit_priority3]:
-      if priority in filtered_limits:
-        self.source = priority
-        return filtered_limits[priority]
+      for priority in [frogpilot_toggles.speed_limit_priority1, frogpilot_toggles.speed_limit_priority2, frogpilot_toggles.speed_limit_priority3]:
+        if priority in filtered_limits:
+          self.source = priority
+          return filtered_limits[priority]
 
     if frogpilot_toggles.slc_fallback_previous_speed_limit:
       return self.previous_speed_limit

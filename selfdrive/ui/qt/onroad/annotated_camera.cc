@@ -106,29 +106,15 @@ void AnnotatedCameraWidget::updateState(int alert_height, const UIState &s) {
 void AnnotatedCameraWidget::drawHud(QPainter &p) {
   p.save();
 
-  static QElapsedTimer flashTimer;
-  static bool isFlashing = false;
-
-  QColor flashColor(255, 0, 0, 255);
-  QPen flashPenColor;
-
+  static QElapsedTimer pendingLimitTimer;
   if (speedLimitChanged) {
-    if (!isFlashing) {
-      flashTimer.start();
-      isFlashing = true;
+    if (!pendingLimitTimer.isValid()) {
+      pendingLimitTimer.start();
     }
-
-    float elapsed = flashTimer.elapsed();
-    float maxElapsed = 10000.0f;
-    float flashInterval = 350.0f * (1.0f + std::min(elapsed / maxElapsed, 1.0f));
-
-    flashPenColor = (elapsed < maxElapsed && fmod(elapsed, flashInterval) < flashInterval / 2) ? QPen(flashColor, 6) : QPen(blackColor(), 6);
-
-    if (elapsed >= maxElapsed) {
-      isFlashing = false;
-      flashPenColor = QPen(flashColor, 6);
-    }
+  } else {
+    pendingLimitTimer.invalidate();
   }
+  QPen pendingLimitPenColor = pendingLimitTimer.isValid() && pendingLimitTimer.elapsed() % 1000 <= 500 ? QPen(redColor(), 6) : QPen(blackColor(), 6);
 
   // Header gradient
   QLinearGradient bg(0, UI_HEADER_HEIGHT - (UI_HEADER_HEIGHT / 2.5), 0, UI_HEADER_HEIGHT);
@@ -276,7 +262,7 @@ void AnnotatedCameraWidget::drawHud(QPainter &p) {
       p.setPen(Qt::NoPen);
       p.setBrush(whiteColor());
       p.drawRoundedRect(new_sign_rect, 24, 24);
-      p.setPen(flashPenColor);
+      p.setPen(pendingLimitPenColor);
       p.drawRoundedRect(new_sign_rect.adjusted(9, 9, -9, -9), 16, 16);
 
       p.setFont(InterFont(28, QFont::DemiBold));
@@ -316,7 +302,7 @@ void AnnotatedCameraWidget::drawHud(QPainter &p) {
       p.drawEllipse(new_sign_rect.adjusted(16, 16, -16, -16));
 
       p.setOpacity(1.0);
-      p.setPen(flashPenColor);
+      p.setPen(pendingLimitPenColor);
       p.setFont(InterFont((newSpeedLimitStr.size() >= 3) ? 60 : 70, QFont::Bold));
       p.drawText(new_sign_rect, Qt::AlignCenter, newSpeedLimitStr);
     }
@@ -899,11 +885,6 @@ void AnnotatedCameraWidget::showEvent(QShowEvent *event) {
 
   ui_update_params(uiState());
   prev_draw_t = millis_since_boot();
-
-  // Update FrogPilot images
-  distance_btn->updateIcon();
-  experimental_btn->updateIcon();
-  updateSignals();
 }
 
 // FrogPilot widgets
@@ -992,6 +973,14 @@ void AnnotatedCameraWidget::initializeFrogPilotWidgets() {
   animationTimer = new QTimer(this);
   QObject::connect(animationTimer, &QTimer::timeout, [this] {
     animationFrameIndex = (animationFrameIndex + 1) % totalFrames;
+  });
+
+  QObject::connect(uiState(), &UIState::togglesUpdated, [this]() {
+    std::thread([this] {
+      distance_btn->updateIcon();
+      experimental_btn->updateIcon();
+      updateSignals();
+    }).detach();
   });
 }
 
@@ -1105,6 +1094,7 @@ void AnnotatedCameraWidget::updateFrogPilotVariables(int alert_height, const UIS
   useViennaSLCSign = scene.speed_limit_vienna;
 
   bool stoppedTimer = scene.stopped_timer && scene.standstill && scene.started_timer / UI_FREQ >= 10 && !mapOpen;
+  static QElapsedTimer standstillTimer;
   if (stoppedTimer) {
     if (!standstillTimer.isValid()) {
       standstillTimer.start();

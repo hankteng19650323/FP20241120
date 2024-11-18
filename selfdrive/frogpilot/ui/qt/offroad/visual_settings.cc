@@ -41,7 +41,6 @@ FrogPilotVisualsPanel::FrogPilotVisualsPanel(FrogPilotSettingsWindow *parent) : 
     {"MapStyle", tr("Map Style"), tr("Swaps out the stock map style for community created ones."), ""},
     {"RoadNameUI", tr("Road Name"), tr("Displays the current road name at the bottom of the screen using data from 'OpenStreetMap'."), ""},
     {"ShowSLCOffset", tr("Show Speed Limit Offset"), tr("Displays the speed limit offset separately in the onroad UI when using 'Speed Limit Controller'."), ""},
-    {"SpeedLimitSources", tr("Show Speed Limit Sources"), tr("Displays the speed limit sources in the onroad UI when using 'Speed Limit Controller'."), ""},
     {"UseVienna", tr("Use Vienna-Style Speed Signs"), tr("Forces Vienna-style (EU) speed limit signs instead of MUTCD (US)."), ""},
 
     {"CustomUI", tr("Onroad Screen Widgets"), tr("Custom FrogPilot widgets used in the onroad user interface."), "../assets/offroad/icon_road.png"},

@@ -46,9 +46,11 @@ Sidebar::Sidebar(QWidget *parent) : QFrame(parent), onroad(false), flag_pressed(
   settingsPngPath = "../frogpilot/assets/active_theme/icons/button_settings.png";
 
   randomEventGifPath = "../frogpilot/assets/random_events/icons/button_home.gif";
+
+  QObject::connect(uiState(), &UIState::togglesUpdated, this, &Sidebar::updateIcons);
 }
 
-void Sidebar::showEvent(QShowEvent *event) {
+void Sidebar::updateIcons() {
   updateIcon(home_label, home_gif, homeGifPath, home_btn, homePngPath, isHomeGif);
   updateIcon(settings_label, settings_gif, settingsGifPath, settings_btn, settingsPngPath, isSettingsGif);
 }
@@ -62,6 +64,7 @@ void Sidebar::updateIcon(QLabel *&label, QMovie *&gif, const QString &gifPath, c
   if (gif != nullptr) {
     gif->stop();
     delete gif;
+    gif = nullptr;
     label->hide();
   }
 
@@ -192,19 +195,6 @@ void Sidebar::offroadTransition(bool offroad) {
 
 void Sidebar::updateState(const UIState &s) {
   if (!isVisible()) {
-    if (home_gif != nullptr) {
-      home_gif->stop();
-      delete home_gif;
-      home_gif = nullptr;
-      home_label->hide();
-    }
-
-    if (settings_gif != nullptr) {
-      settings_gif->stop();
-      delete settings_gif;
-      settings_gif = nullptr;
-      settings_label->hide();
-    }
     return;
   }
 

@@ -272,8 +272,8 @@ typedef struct UIScene {
   int model_length;
   int obstacle_distance;
   int obstacle_distance_stock;
-  int screen_brightness;
-  int screen_brightness_onroad;
+  int screen_brightness = -1;
+  int screen_brightness_onroad = -1;
   int screen_timeout;
   int screen_timeout_onroad;
   int started_timer;
@@ -324,6 +324,7 @@ signals:
   // FrogPilot signals
   void driveRated();
   void reviewModel();
+  void togglesUpdated();
 
 private slots:
   void update();

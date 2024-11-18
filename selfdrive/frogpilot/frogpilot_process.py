@@ -6,6 +6,7 @@ import time
 import openpilot.system.sentry as sentry
 
 from cereal import messaging
+from openpilot.common.params import Params
 from openpilot.common.realtime import Priority, config_realtime_process
 from openpilot.common.time import system_time_valid
 from openpilot.system.hardware import HARDWARE
@@ -16,7 +17,7 @@ from openpilot.selfdrive.frogpilot.controls.frogpilot_planner import FrogPilotPl
 from openpilot.selfdrive.frogpilot.controls.lib.frogpilot_tracking import FrogPilotTracking
 from openpilot.selfdrive.frogpilot.frogpilot_functions import backup_toggles
 from openpilot.selfdrive.frogpilot.frogpilot_utilities import is_url_pingable
-from openpilot.selfdrive.frogpilot.frogpilot_variables import FrogPilotVariables, get_frogpilot_toggles, params, params_memory, params_storage
+from openpilot.selfdrive.frogpilot.frogpilot_variables import FrogPilotVariables, get_frogpilot_toggles, params, params_memory
 
 locks = {
   "backup_toggles": threading.Lock(),
@@ -126,6 +127,8 @@ def update_maps(now):
 
 def frogpilot_thread():
   config_realtime_process(5, Priority.CTRL_LOW)
+
+  params_storage = Params("/persist/params")
 
   frogpilot_planner = FrogPilotPlanner()
   frogpilot_tracking = FrogPilotTracking()

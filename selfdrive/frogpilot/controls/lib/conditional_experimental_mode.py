@@ -6,6 +6,7 @@ class ConditionalExperimentalMode:
     self.frogpilot_planner = FrogPilotPlanner
 
     self.curvature_mac = MovingAverageCalculator()
+    self.slow_lead_mac = MovingAverageCalculator()
     self.stop_light_mac = MovingAverageCalculator()
 
     self.curve_detected = False
@@ -59,7 +60,6 @@ class ConditionalExperimentalMode:
     if self.frogpilot_planner.frogpilot_vcruise.slc.experimental_mode:
       self.status_value = 17
       return True
-
     return False
 
   def update_conditions(self, frogpilotCarState, tracking_lead, v_ego, v_lead, frogpilot_toggles):
@@ -68,19 +68,25 @@ class ConditionalExperimentalMode:
     self.stop_sign_and_light(frogpilotCarState, tracking_lead, v_ego, frogpilot_toggles)
 
   def curve_detection(self, tracking_lead, v_ego, frogpilot_toggles):
-    curve_detected = (1 / self.frogpilot_planner.road_curvature)**0.5 < v_ego
-    curve_active = (0.9 / self.frogpilot_planner.road_curvature)**0.5 < v_ego and self.curve_detected
+    if v_ego > CRUISING_SPEED:
+      curve_detected = (1 / self.frogpilot_planner.road_curvature)**0.5 < v_ego
+      curve_active = (0.9 / self.frogpilot_planner.road_curvature)**0.5 < v_ego and self.curve_detected
 
-    self.curvature_mac.add_data(curve_detected or curve_active)
-    self.curve_detected = self.curvature_mac.get_moving_average() >= THRESHOLD
+      self.curvature_mac.add_data(curve_detected or curve_active)
+      self.curve_detected = self.curvature_mac.get_moving_average() >= THRESHOLD
+    else:
+      self.curvature_mac.reset_data()
+      self.curve_detected = False
 
   def slow_lead(self, tracking_lead, v_lead, frogpilot_toggles):
     if tracking_lead:
-      slower_lead = self.frogpilot_planner.frogpilot_following.slower_lead and frogpilot_toggles.conditional_slower_lead
+      slower_lead = frogpilot_toggles.conditional_slower_lead and self.frogpilot_planner.frogpilot_following.slower_lead
       stopped_lead = frogpilot_toggles.conditional_stopped_lead and v_lead < 1
 
-      self.slow_lead_detected = slower_lead or stopped_lead
+      self.slow_lead_mac.add_data(slower_lead or stopped_lead)
+      self.slow_lead_detected = self.slow_lead_mac.get_moving_average() >= THRESHOLD
     else:
+      self.slow_lead_mac.reset_data()
       self.slow_lead_detected = False
 
   def stop_sign_and_light(self, frogpilotCarState, tracking_lead, v_ego, frogpilot_toggles):
