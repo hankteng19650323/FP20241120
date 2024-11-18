@@ -85,8 +85,10 @@ class ThemeManager:
   @staticmethod
   def calculate_thanksgiving(year):
     november_first = date(year, 11, 1)
-    day_of_week = november_first.weekday()
-    return november_first + timedelta(days=(3 - day_of_week + 21) % 7 + 21)
+    days_to_thursday = (3 - november_first.weekday()) % 7
+    first_thursday = november_first + timedelta(days=days_to_thursday)
+    thanksgiving_date = first_thursday + timedelta(days=21)
+    return thanksgiving_date
 
   @staticmethod
   def is_within_week_of(target_date, now):
