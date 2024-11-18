@@ -357,13 +357,13 @@ void AnnotatedCameraWidget::drawHud(QPainter &p) {
     };
 
     QRect dashboardRect(sign_rect.x() - sign_margin, sign_rect.y() + sign_rect.height() + 35, 500, 60);
-    QRect navigationRect(dashboardRect.x(), dashboardRect.y() + dashboardRect.height() + 15, 500, 60);
-    QRect offlineMapsRect(navigationRect.x(), navigationRect.y() + navigationRect.height() + 15, 500, 60);
-    QRect upcomingLimitRect(offlineMapsRect.x(), offlineMapsRect.y() + offlineMapsRect.height() + 15, 500, 60);
+    QRect mapDataRect(dashboardRect.x(), dashboardRect.y() + dashboardRect.height() + 15, 500, 60);
+    QRect navigationRect(mapDataRect.x(), mapDataRect.y() + mapDataRect.height() + 15, 500, 60);
+    QRect upcomingLimitRect(navigationRect.x(), navigationRect.y() + navigationRect.height() + 15, 500, 60);
 
     drawSource(dashboardRect, dashboardIcon, "Dashboard", dashboardSpeedLimit);
+    drawSource(mapDataRect, mapDataIcon, "Map Data", mapsSpeedLimit);
     drawSource(navigationRect, navigationIcon, "Navigation", navigationSpeedLimit);
-    drawSource(offlineMapsRect, offlineMapsIcon, "Offline Maps", mapsSpeedLimit);
     drawSource(upcomingLimitRect, upcomingMapsIcon, "Upcoming", upcomingSpeedLimit);
   }
 
@@ -984,8 +984,8 @@ void AnnotatedCameraWidget::initializeFrogPilotWidgets() {
   main_layout->addLayout(bottom_layout);
 
   dashboardIcon = loadPixmap("../frogpilot/assets/other_images/dashboard_icon.png", QSize(img_size / 2, img_size / 2));
+  mapDataIcon = loadPixmap("../frogpilot/assets/other_images/offline_maps_icon.png", QSize(img_size / 2, img_size / 2));
   navigationIcon = loadPixmap("../frogpilot/assets/other_images/navigation_icon.png", QSize(img_size / 2, img_size / 2));
-  offlineMapsIcon = loadPixmap("../frogpilot/assets/other_images/offline_maps_icon.png", QSize(img_size / 2, img_size / 2));
   stopSignImg = loadPixmap("../frogpilot/assets/other_images/stop_sign.png", QSize(img_size, img_size));
   upcomingMapsIcon = loadPixmap("../frogpilot/assets/other_images/upcoming_maps_icon.png", QSize(img_size / 2, img_size / 2));
 

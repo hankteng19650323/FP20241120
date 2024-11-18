@@ -369,8 +369,8 @@ FrogPilotLongitudinalPanel::FrogPilotLongitudinalPanel(FrogPilotSettingsWindow *
       longitudinalToggle = overrideSelection;
     } else if (param == "SLCPriority") {
       ButtonControl *slcPriorityButton = new ButtonControl(title, tr("SELECT"), desc);
-      QStringList primaryPriorities = {tr("None"), tr("Dashboard"), tr("Navigation"), tr("Offline Maps"), tr("Highest"), tr("Lowest")};
-      QStringList secondaryTertiaryPriorities = {tr("None"), tr("Dashboard"), tr("Navigation"), tr("Offline Maps")};
+      QStringList primaryPriorities = {tr("None"), tr("Dashboard"), tr("Map Data"), tr("Navigation"), tr("Highest"), tr("Lowest")};
+      QStringList secondaryTertiaryPriorities = {tr("None"), tr("Dashboard"), tr("Map Data"), tr("Navigation")};
       QStringList priorityPrompts = {tr("Select your primary priority"), tr("Select your secondary priority"), tr("Select your tertiary priority")};
 
       QObject::connect(slcPriorityButton, &ButtonControl::clicked, [=]() {

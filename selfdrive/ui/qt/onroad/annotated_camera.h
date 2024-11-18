@@ -116,8 +116,8 @@ private:
   QHBoxLayout *bottom_layout;
 
   QPixmap dashboardIcon;
+  QPixmap mapDataIcon;
   QPixmap navigationIcon;
-  QPixmap offlineMapsIcon;
   QPixmap stopSignImg;
   QPixmap upcomingMapsIcon;
 

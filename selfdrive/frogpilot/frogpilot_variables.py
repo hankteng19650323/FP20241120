@@ -285,7 +285,7 @@ frogpilot_default_params: list[tuple[str, str | bytes]] = [
   ("SLCOverride", "1"),
   ("SLCPriority1", "Dashboard"),
   ("SLCPriority2", "Navigation"),
-  ("SLCPriority3", "Offline Maps"),
+  ("SLCPriority3", "Map Data"),
   ("SNGHack", "1"),
   ("SpeedLimitChangedAlert", "1"),
   ("SpeedLimitController", "1"),

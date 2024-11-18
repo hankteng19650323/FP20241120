@@ -71,7 +71,7 @@ class SpeedLimitController:
   def get_speed_limit(self, dashboard_speed_limit, max_speed_limit, navigation_speed_limit, frogpilot_toggles):
     limits = {
       "Dashboard": dashboard_speed_limit,
-      "Offline Maps": self.map_speed_limit,
+      "Map Data": self.map_speed_limit,
       "Navigation": navigation_speed_limit
     }
     filtered_limits = {source: float(limit) for source, limit in limits.items() if limit > 1}
