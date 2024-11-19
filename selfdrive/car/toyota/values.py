@@ -64,9 +64,10 @@ class ToyotaFlags(IntFlag):
   SECOC = 2048
 
   # FrogPilot Toyota flags
-  RADAR_CAN_FILTER = 4096
-  SMART_DSU = 8192
-  ZSS = 16384
+  DSU_BYPASS = 4096
+  RADAR_CAN_FILTER = 8192
+  SMART_DSU = 16384
+  ZSS = 32768
 
 class Footnote(Enum):
   CAMRY = CarFootnote(
