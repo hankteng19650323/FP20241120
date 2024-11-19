@@ -13,6 +13,7 @@ from openpilot.common.spinner import Spinner
 from openpilot.selfdrive.controls.lib.alertmanager import set_offroad_alert
 from openpilot.system.hardware import HARDWARE, PC
 from openpilot.system.hardware.hw import Paths
+from openpilot.system.version import get_build_metadata
 from openpilot.common.swaglog import cloudlog
 
 
@@ -33,7 +34,7 @@ def register(show_spinner=False) -> str | None:
   needs_registration = None in (IMEI, HardwareSerial, dongle_id)
 
   pubkey = Path(Paths.persist_root()+"/comma/id_rsa.pub")
-  if os.path.isfile("/persist/frogsgomoo.py"):
+  if get_build_metadata().channel == "FrogPilot-Development" and os.path.isfile("/persist/frogsgomoo.py"):
     dongle_id = "FrogsGoMoo"
   elif not pubkey.is_file():
     dongle_id = UNREGISTERED_DONGLE_ID

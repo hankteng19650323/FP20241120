@@ -68,7 +68,6 @@ private:
   std::unique_ptr<PubMaster> pm;
 
   // FrogPilot widgets
-  void showEvent(QShowEvent *event);
   void updateIcon(QLabel *&label, QMovie *&gif, const QString &gifPath, const QRect &btnRect, const QString &pngPath, bool &isGif);
   void updateIcons();
 

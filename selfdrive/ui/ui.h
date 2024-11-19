@@ -138,6 +138,7 @@ typedef struct UIScene {
   bool acceleration_path;
   bool adjacent_path;
   bool adjacent_path_metrics;
+  bool always_on_lateral;
   bool always_on_lateral_active;
   bool aol_status_bar;
   bool big_map;
@@ -167,8 +168,10 @@ typedef struct UIScene {
   bool hide_map_icon;
   bool hide_max_speed;
   bool hide_speed;
+  bool hide_speed_limit;
   bool ip_metrics;
   bool jerk_metrics;
+  bool keep_screen_on;
   bool lateral_tuning_metrics;
   bool lead_metrics;
   bool live_valid;
@@ -176,6 +179,8 @@ typedef struct UIScene {
   bool memory_metrics;
   bool model_randomizer;
   bool model_ui;
+  bool no_logging;
+  bool no_uploads;
   bool numerical_temp;
   bool online;
   bool onroad_distance_button;
@@ -256,8 +261,8 @@ typedef struct UIScene {
   int model_length;
   int obstacle_distance;
   int obstacle_distance_stock;
-  int screen_brightness;
-  int screen_brightness_onroad;
+  int screen_brightness = -1;
+  int screen_brightness_onroad = -1;
   int screen_timeout;
   int screen_timeout_onroad;
   int started_timer;
@@ -304,6 +309,7 @@ signals:
   // FrogPilot signals
   void driveRated();
   void reviewModel();
+  void togglesUpdated();
 
 private slots:
   void update();

@@ -46,9 +46,11 @@ Sidebar::Sidebar(QWidget *parent) : QFrame(parent), onroad(false), flag_pressed(
   settingsPngPath = "../frogpilot/assets/active_theme/icons/button_settings.png";
 
   randomEventGifPath = "../frogpilot/assets/random_events/icons/button_home.gif";
+
+  QObject::connect(uiState(), &UIState::togglesUpdated, this, &Sidebar::updateIcons);
 }
 
-void Sidebar::showEvent(QShowEvent *event) {
+void Sidebar::updateIcons() {
   updateIcon(home_label, home_gif, homeGifPath, home_btn, homePngPath, isHomeGif);
   updateIcon(settings_label, settings_gif, settingsGifPath, settings_btn, settingsPngPath, isSettingsGif);
 }
@@ -62,6 +64,7 @@ void Sidebar::updateIcon(QLabel *&label, QMovie *&gif, const QString &gifPath, c
   if (gif != nullptr) {
     gif->stop();
     delete gif;
+    gif = nullptr;
     label->hide();
   }
 
@@ -122,7 +125,9 @@ void Sidebar::mousePressEvent(QMouseEvent *event) {
 
     update();
     return;
-  } else if (memoryRect.contains(pos) && isSidebarMetrics) {
+  }
+
+  if (memoryRect.contains(pos) && isSidebarMetrics) {
     showMemory = (showMemory + 1) % 4;
 
     isMemoryUsage = (showMemory == 1);
@@ -139,7 +144,9 @@ void Sidebar::mousePressEvent(QMouseEvent *event) {
 
     update();
     return;
-  } else if (tempRect.contains(pos) && isSidebarMetrics) {
+  }
+
+  if (tempRect.contains(pos) && isSidebarMetrics) {
     showTemp = (showTemp + 1) % 3;
 
     isFahrenheit = showTemp == 2;
@@ -152,11 +159,15 @@ void Sidebar::mousePressEvent(QMouseEvent *event) {
 
     update();
     return;
-  } else if (onroad && home_btn.contains(pos)) {
+  }
+
+  if (onroad && home_btn.contains(pos)) {
     flag_pressed = true;
     update();
     return;
-  } else if (settings_btn.contains(pos)) {
+  }
+
+  if (settings_btn.contains(pos)) {
     settings_pressed = true;
     update();
     return;
@@ -184,20 +195,6 @@ void Sidebar::offroadTransition(bool offroad) {
 
 void Sidebar::updateState(const UIState &s) {
   if (!isVisible()) {
-    if (home_gif != nullptr) {
-      home_gif->stop();
-      delete home_gif;
-      home_gif = nullptr;
-      home_label->hide();
-    }
-
-    if (settings_gif != nullptr) {
-      settings_gif->stop();
-      delete settings_gif;
-      settings_gif = nullptr;
-      settings_label->hide();
-    }
-
     return;
   }
 
@@ -214,7 +211,7 @@ void Sidebar::updateState(const UIState &s) {
     connectStatus = ItemStatus{{tr("CONNECT"), tr("OFFLINE")}, warning_color};
   } else {
     connectStatus = nanos_since_boot() - last_ping < 80e9
-                        ? ItemStatus{{tr("CONNECT"), tr("ONLINE")}, sidebar_color1}
+                        ? ItemStatus{{tr("CONNECT"), tr("ONLINE")}, sidebar_color3}
                         : ItemStatus{{tr("CONNECT"), tr("ERROR")}, danger_color};
   }
   setProperty("connectStatus", QVariant::fromValue(connectStatus));
@@ -246,9 +243,9 @@ void Sidebar::updateState(const UIState &s) {
   isMemoryUsage = scene.memory_metrics;
   isNumericalTemp = scene.numerical_temp;
   isRandomEvents = scene.random_events;
+  isSidebarMetrics = scene.sidebar_metrics;
   isStorageLeft = scene.storage_left_metrics;
   isStorageUsed = scene.storage_used_metrics;
-  isSidebarMetrics = scene.sidebar_metrics;
 
   bool useStockColors = scene.use_stock_colors;
   sidebar_color1 = useStockColors ? good_color : scene.sidebar_color1;
@@ -264,18 +261,15 @@ void Sidebar::updateState(const UIState &s) {
     auto cpu_loads = deviceState.getCpuUsagePercent();
     int cpu_usage = cpu_loads.size() != 0 ? std::accumulate(cpu_loads.begin(), cpu_loads.end(), 0) / cpu_loads.size() : 0;
     int gpu_usage = deviceState.getGpuUsagePercent();
-
-    QString cpu = QString::number(cpu_usage) + "%";
-    QString gpu = QString::number(gpu_usage) + "%";
-
-    QString metric = isGPU ? gpu : cpu;
     int usage = isGPU ? gpu_usage : cpu_usage;
 
-    ItemStatus cpuStatus = {{isGPU ? tr("GPU") : tr("CPU"), metric}, sidebar_color2};
+    QString chip_usage = QString::number(usage) + "%";
+
+    ItemStatus cpuStatus = {{isGPU ? tr("GPU") : tr("CPU"), chip_usage}, sidebar_color2};
     if (usage >= 85) {
-      cpuStatus = {{isGPU ? tr("GPU") : tr("CPU"), metric}, danger_color};
+      cpuStatus = {{isGPU ? tr("GPU") : tr("CPU"), chip_usage}, danger_color};
     } else if (usage >= 70) {
-      cpuStatus = {{isGPU ? tr("GPU") : tr("CPU"), metric}, warning_color};
+      cpuStatus = {{isGPU ? tr("GPU") : tr("CPU"), chip_usage}, warning_color};
     }
     setProperty("cpuStatus", QVariant::fromValue(cpuStatus));
   }
