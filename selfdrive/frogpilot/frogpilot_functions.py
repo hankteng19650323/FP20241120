@@ -120,7 +120,7 @@ def backup_toggles(params, params_storage):
     if params.get_key_type(key) & ParamKeyType.FROGPILOT_STORAGE:
       value = params.get(key)
       if value is not None:
-        params_storage.put(key, value)
+        params_storage.put_nonblocking(key, value)
 
   backup_path = os.path.join("/data", "toggle_backups")
   maximum_backups = 10

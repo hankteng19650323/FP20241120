@@ -74,14 +74,15 @@ def manager_init() -> None:
     params.put_bool("RecordFront", True)
 
   # set unset params
+  reset_toggles = params.get_bool("DoToggleReset")
   for k, v in default_params + frogpilot_default_params:
-    if params.get(k) is None or params.get_bool("DoToggleReset"):
-      if params_storage.get(k) is None:
+    if params.get(k) is None or reset_toggles:
+      if params_storage.get(k) is None or reset_toggles:
         params.put(k, v if isinstance(v, bytes) else str(v).encode('utf-8'))
       else:
         params.put(k, params_storage.get(k))
     else:
-      params_storage.put(k, params.get(k))
+      params_storage.put_nonblocking(k, params.get(k))
 
   params.remove("DoToggleReset")
 
