@@ -181,11 +181,13 @@ typedef struct UIScene {
   bool keep_screen_on;
   bool lateral_tuning_metrics;
   bool lead_metrics;
+  bool left_curve;
   bool live_valid;
   bool map_open;
   bool memory_metrics;
   bool model_randomizer;
   bool model_ui;
+  bool mtsc_enabled;
   bool no_logging;
   bool no_uploads;
   bool numerical_temp;
@@ -231,6 +233,7 @@ typedef struct UIScene {
   bool use_stock_wheel;
   bool use_wheel_speed;
   bool vtsc_controlling_curve;
+  bool vtsc_enabled;
   bool wake_up_screen;
 
   double fps;
@@ -238,7 +241,6 @@ typedef struct UIScene {
   float acceleration;
   float acceleration_jerk;
   float acceleration_jerk_difference;
-  float adjusted_cruise;
   float dashboard_speed_limit;
   float friction;
   float lane_detection_width;
@@ -247,6 +249,7 @@ typedef struct UIScene {
   float lane_width_right;
   float lat_accel;
   float lead_detection_probability;
+  float mtsc_speed;
   float navigation_speed_limit;
   float path_edge_width;
   float path_width;
@@ -260,6 +263,7 @@ typedef struct UIScene {
   float steer;
   float unconfirmed_speed_limit;
   float upcoming_speed_limit;
+  float vtsc_speed;
 
   int bearing_deg;
   int camera_view;

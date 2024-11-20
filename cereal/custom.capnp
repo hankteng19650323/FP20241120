@@ -49,18 +49,18 @@ struct FrogPilotNavigation @0xda96579883444c35 {
 struct FrogPilotPlan @0x80ae746ee2596b11 {
   accelerationJerk @0 :Float32;
   accelerationJerkStock @1 :Float32;
-  adjustedCruise @2 :Float32;
-  dangerJerk @3 :Float32;
-  desiredFollowDistance @4 :Int64;
-  experimentalMode @5 :Bool;
-  forcingStop @6 :Bool;
-  forcingStopLength @7 :Float32;
-  frogpilotEvents @8 :List(Car.CarEvent);
-  lateralCheck @9 :Bool;
-  laneWidthLeft @10 :Float32;
-  laneWidthRight @11 :Float32;
-  maxAcceleration @12 :Float32;
-  minAcceleration @13 :Float32;
+  dangerJerk @2 :Float32;
+  desiredFollowDistance @3 :Int64;
+  experimentalMode @4 :Bool;
+  forcingStop @5 :Bool;
+  forcingStopLength @6 :Float32;
+  frogpilotEvents @7 :List(Car.CarEvent);
+  lateralCheck @8 :Bool;
+  laneWidthLeft @9 :Float32;
+  laneWidthRight @10 :Float32;
+  maxAcceleration @11 :Float32;
+  minAcceleration @12 :Float32;
+  mtscSpeed @13 :Float32;
   redLight @14 :Bool;
   safeObstacleDistance @15 :Int64;
   safeObstacleDistanceStock @16 :Int64;
@@ -80,6 +80,7 @@ struct FrogPilotPlan @0x80ae746ee2596b11 {
   upcomingSLCSpeedLimit @30 :Float32;
   vCruise @31 :Float32;
   vtscControllingCurve @32 :Bool;
+  vtscSpeed @33 :Float32;
 }
 
 struct CustomReserved5 @0xa5cd762cd951a455 {

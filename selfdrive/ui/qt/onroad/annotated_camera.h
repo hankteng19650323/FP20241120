@@ -113,11 +113,14 @@ private:
 
   QHBoxLayout *bottom_layout;
 
+  QPixmap curveSpeedLeftIcon;
+  QPixmap curveSpeedRightIcon;
   QPixmap dashboardIcon;
   QPixmap mapDataIcon;
   QPixmap navigationIcon;
   QPixmap stopSignImg;
   QPixmap upcomingMapsIcon;
+  QPixmap visionIcon;
 
   QString accelerationUnit;
   QString leadDistanceUnit;
@@ -140,7 +143,9 @@ private:
   bool hideSpeed;
   bool hideSpeedLimit;
   bool leadInfo;
+  bool leftCurve;
   bool mapOpen;
+  bool mtscEnabled;
   bool onroadDistanceButton;
   bool roadNameUI;
   bool showAlwaysOnLateralStatusBar;
@@ -158,22 +163,24 @@ private:
   bool useSI;
   bool useViennaSLCSign;
   bool vtscControllingCurve;
+  bool vtscEnabled;
 
   double currentAcceleration;
 
   float accelerationConversion;
-  float curveSpeed;
   float dashboardSpeedLimit;
   float distanceConversion;
   float laneDetectionWidth;
   float lead_x;
   float lead_y;
   float mapsSpeedLimit;
+  float mtscSpeed;
   float navigationSpeedLimit;
   float slcSpeedLimitOffset;
   float speedConversion;
   float unconfirmedSpeedLimit;
   float upcomingSpeedLimit;
+  float vtscSpeed;
 
   int alertHeight;
   int animationFrameIndex;

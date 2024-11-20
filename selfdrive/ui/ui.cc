@@ -118,6 +118,7 @@ void update_model(UIState *s,
                   const cereal::UiPlan::Reader &plan) {
   SubMaster &sm = *(s->sm);
   UIScene &scene = s->scene;
+  scene.left_curve = model.getOrientationRate().getZ()[33 - 1] < 0;
   float path_offset_z = sm["liveCalibration"].getLiveCalibration().getHeight()[0];
   auto plan_position = plan.getPosition();
   scene.model_length = model.getPosition().getX()[33 - 1];
@@ -318,10 +319,10 @@ static void update_state(UIState *s) {
     auto frogpilotPlan = sm["frogpilotPlan"].getFrogpilotPlan();
     scene.acceleration_jerk = frogpilotPlan.getAccelerationJerk();
     scene.acceleration_jerk_difference = frogpilotPlan.getAccelerationJerkStock() - scene.acceleration_jerk;
-    scene.adjusted_cruise = frogpilotPlan.getAdjustedCruise();
     scene.desired_follow = frogpilotPlan.getDesiredFollowDistance();
     scene.lane_width_left = frogpilotPlan.getLaneWidthLeft();
     scene.lane_width_right = frogpilotPlan.getLaneWidthRight();
+    scene.mtsc_speed = frogpilotPlan.getMtscSpeed();
     scene.obstacle_distance = frogpilotPlan.getSafeObstacleDistance();
     scene.obstacle_distance_stock = frogpilotPlan.getSafeObstacleDistanceStock();
     scene.red_light = frogpilotPlan.getRedLight();
@@ -338,6 +339,7 @@ static void update_state(UIState *s) {
     scene.unconfirmed_speed_limit = frogpilotPlan.getUnconfirmedSlcSpeedLimit();
     scene.upcoming_speed_limit = frogpilotPlan.getUpcomingSLCSpeedLimit();
     scene.vtsc_controlling_curve = frogpilotPlan.getVtscControllingCurve();
+    scene.vtsc_speed = frogpilotPlan.getVtscSpeed();
     if (frogpilotPlan.getTogglesUpdated()) {
       scene.frogpilot_toggles = QJsonDocument::fromJson(QString::fromStdString(params.get("FrogPilotToggles")).toUtf8()).object();
       ui_update_params(s);
@@ -426,6 +428,7 @@ void ui_update_frogpilot_params(UIState *s) {
   scene.lead_metrics = scene.frogpilot_toggles.value("lead_metrics").toBool();
   scene.map_style = scene.frogpilot_toggles.value("map_style").toDouble();
   scene.memory_metrics = scene.frogpilot_toggles.value("memory_metrics").toBool();
+  scene.mtsc_enabled = scene.frogpilot_toggles.value("map_turn_speed_controller").toBool();
   scene.minimum_lane_change_speed = scene.frogpilot_toggles.value("minimum_lane_change_speed").toDouble();
   scene.model_randomizer = scene.frogpilot_toggles.value("model_randomizer").toBool();
   scene.model_ui = scene.frogpilot_toggles.value("model_ui").toBool();
@@ -478,6 +481,7 @@ void ui_update_frogpilot_params(UIState *s) {
   scene.use_stock_colors = (scene.frogpilot_toggles.value("color_scheme").toString() == "stock");
   scene.use_stock_wheel = (scene.frogpilot_toggles.value("wheel_image").toString() == "stock");
   scene.use_wheel_speed = scene.frogpilot_toggles.value("use_wheel_speed").toBool();
+  scene.vtsc_enabled = scene.frogpilot_toggles.value("vision_turn_controller").toBool();
 
   if (scene.tethering_config == 1) {
     WifiManager(s).setTetheringEnabled(true);

@@ -104,8 +104,9 @@ class FrogPilotPlanner:
     frogpilotPlan.speedJerkStock = float(J_EGO_COST * self.frogpilot_following.base_speed_jerk)
     frogpilotPlan.tFollow = float(self.frogpilot_following.t_follow)
 
-    frogpilotPlan.adjustedCruise = float(min(self.frogpilot_vcruise.mtsc_target, self.frogpilot_vcruise.vtsc_target) * (CV.MS_TO_KPH if frogpilot_toggles.is_metric else CV.MS_TO_MPH))
+    frogpilotPlan.mtscSpeed = float(self.frogpilot_vcruise.mtsc_target)
     frogpilotPlan.vtscControllingCurve = bool(self.frogpilot_vcruise.mtsc_target > self.frogpilot_vcruise.vtsc_target)
+    frogpilotPlan.vtscSpeed = float(self.frogpilot_vcruise.vtsc_target)
 
     frogpilotPlan.desiredFollowDistance = self.frogpilot_following.safe_obstacle_distance - self.frogpilot_following.stopped_equivalence_factor
     frogpilotPlan.safeObstacleDistance = self.frogpilot_following.safe_obstacle_distance

@@ -122,12 +122,13 @@ void AnnotatedCameraWidget::drawHud(QPainter &p) {
   bg.setColorAt(1, QColor::fromRgbF(0, 0, 0, 0));
   p.fillRect(0, 0, width(), UI_HEADER_HEIGHT, bg);
 
-  QString curveSpeedStr = (curveSpeed > 1) ? QString::number(std::nearbyint(curveSpeed)) : "–";
+  QString mtscSpeedStr = (mtscSpeed > 1) ? QString::number(std::nearbyint(mtscSpeed)) : "–";
   QString newSpeedLimitStr = (unconfirmedSpeedLimit > 1) ? QString::number(std::nearbyint(unconfirmedSpeedLimit * (is_metric ? MS_TO_KPH : MS_TO_MPH))) : "–";
   QString speedLimitStr = (speedLimit > 1) ? QString::number(std::nearbyint(speedLimit)) : "–";
   QString speedLimitOffsetStr = (slcSpeedLimitOffset == 0) ? "–" : QString::number(slcSpeedLimitOffset, 'f', 0).prepend((slcSpeedLimitOffset > 0) ? "+" : "");
   QString speedStr = QString::number(std::nearbyint(speed));
   QString setSpeedStr = is_cruise_set ? QString::number(std::nearbyint(setSpeed)) : "–";
+  QString vtscSpeedStr = (vtscSpeed > 1) ? QString::number(std::nearbyint(vtscSpeed)) : "–";
 
   // Draw outer box + border to contain set speed and speed limit
   const int sign_margin = 12;
@@ -182,45 +183,53 @@ void AnnotatedCameraWidget::drawHud(QPainter &p) {
     p.drawText(set_speed_rect.adjusted(0, 77, 0, 0), Qt::AlignTop | Qt::AlignHCenter, setSpeedStr);
   }
 
-  if (is_cruise_set && setSpeed - curveSpeed > 1) {
-    QRect curve_speed_rect = set_speed_rect.translated(set_speed_rect.width() + 25, 0);
-    curve_speed_rect.setWidth(223);
+  if (is_cruise_set && (setSpeed - mtscSpeed > 1 || setSpeed - vtscSpeed > 1)) {
+    std::function<void(QPainter&, const QRect&, bool)> drawCurveSpeedControl = [&](QPainter &p, const QRect &rect, bool isMtsc) {
+      p.setRenderHint(QPainter::Antialiasing);
 
-    QPointF center = curve_speed_rect.center();
-    p.save();
-    p.translate(center);
-    p.rotate(45);
-    p.translate(-center);
-    p.setPen(QPen(blackColor(), 10));
-    p.setBrush(vtscControllingCurve ? redColor() : greenColor());
-    p.drawRoundedRect(curve_speed_rect, 24, 24);
-    p.restore();
+      if (isMtsc && !vtscControllingCurve) {
+        p.setPen(QPen(redColor(), 10));
+        p.setBrush(redColor(166));
+      } else if (!isMtsc && vtscControllingCurve) {
+        p.setPen(QPen(redColor(), 10));
+        p.setBrush(redColor(166));
+      } else {
+        p.setPen(QPen(blackColor(), 10));
+        p.setBrush(blackColor(166));
+      }
 
-    p.setPen(QPen(whiteColor(), 6));
-    p.save();
-    p.translate(center);
-    p.rotate(45);
-    p.translate(-center);
-    p.drawRoundedRect(curve_speed_rect.adjusted(9, 9, -9, -9), 16, 16);
-    p.restore();
+      p.drawRoundedRect(rect.adjusted(-10, -10, 10, 10), 24, 24);
 
-    p.setOpacity(1.0);
-    p.setFont(InterFont(70, QFont::Bold));
+      QPixmap scaledIcon = (leftCurve ? curveSpeedLeftIcon : curveSpeedRightIcon).scaled(rect.size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+      p.drawPixmap(rect, scaledIcon);
 
-    if (vtscControllingCurve) {
-      p.drawText(curve_speed_rect.adjusted(curve_speed_rect.width() / 2, 85, curve_speed_rect.width(), 0), Qt::AlignTop | Qt::AlignLeft, curveSpeedStr);
-    } else {
-      p.drawText(curve_speed_rect.adjusted(0, 85, curve_speed_rect.width() / 2, 0), Qt::AlignTop | Qt::AlignRight, curveSpeedStr);
+      p.setPen(blackColor());
+      p.setFont(InterFont(50, QFont::Bold));
+      QRect textRect = rect.adjusted(leftCurve ? -10 : 10, 15, leftCurve ? -10 : 10, 10);
+      p.drawText(textRect, Qt::AlignCenter, isMtsc ? mtscSpeedStr : vtscSpeedStr);
+
+      scaledIcon = (isMtsc ? mapDataIcon : visionIcon).scaled(rect.size() / 4, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+      QRect iconRect(rect.left(), rect.bottom() - scaledIcon.height(), scaledIcon.width(), scaledIcon.height());
+      p.drawPixmap(iconRect, scaledIcon);
+    };
+
+    if (mtscEnabled) {
+      QRect mtscRect = set_speed_rect.translated(set_speed_rect.width() + 25, 10);
+      int speedLimitHeight = has_us_speed_limit ? us_sign_height + sign_margin : (has_eu_speed_limit ? eu_sign_size + sign_margin : 0);
+      mtscRect.setSize(QSize(set_speed_rect.height() - speedLimitHeight - 20, set_speed_rect.height() - speedLimitHeight - 20));
+      drawCurveSpeedControl(p, mtscRect, true);
+
+      if (vtscEnabled) {
+        QRect vtscRect = mtscRect.translated(mtscRect.width() + 35, 0);
+        vtscRect.setSize(QSize(mtscRect.height(), mtscRect.height()));
+        drawCurveSpeedControl(p, vtscRect, false);
+      }
+    } else if (vtscEnabled) {
+      QRect vtscRect = set_speed_rect.translated(set_speed_rect.width() + 25, 10);
+      int speedLimitHeight = has_us_speed_limit ? us_sign_height + sign_margin : (has_eu_speed_limit ? eu_sign_size + sign_margin : 0);
+      vtscRect.setSize(QSize(set_speed_rect.height() - speedLimitHeight - 20, set_speed_rect.height() - speedLimitHeight - 20));
+      drawCurveSpeedControl(p, vtscRect, false);
     }
-
-    QPainterPath curvedArrow;
-    curvedArrow.moveTo(center.x() - 40, center.y());
-    curvedArrow.arcTo(QRectF(center.x() - 40, center.y() - 40, 80, 80), 0, 270);
-    curvedArrow.lineTo(center.x() + 10, center.y() - 10);
-
-    p.setPen(QPen(blackColor(), 3));
-    p.setBrush(blackColor());
-    p.drawPath(curvedArrow);
   }
 
   const QRect sign_rect = set_speed_rect.adjusted(sign_margin, default_size.height(), -sign_margin, -sign_margin);
@@ -964,11 +973,14 @@ void AnnotatedCameraWidget::initializeFrogPilotWidgets() {
 
   main_layout->addLayout(bottom_layout);
 
+  curveSpeedLeftIcon = loadPixmap("../frogpilot/assets/other_images/curve_speed_left.png", QSize(img_size, img_size));
+  curveSpeedRightIcon = loadPixmap("../frogpilot/assets/other_images/curve_speed_right.png", QSize(img_size, img_size));
   dashboardIcon = loadPixmap("../frogpilot/assets/other_images/dashboard_icon.png", QSize(img_size / 2, img_size / 2));
   mapDataIcon = loadPixmap("../frogpilot/assets/other_images/offline_maps_icon.png", QSize(img_size / 2, img_size / 2));
   navigationIcon = loadPixmap("../frogpilot/assets/other_images/navigation_icon.png", QSize(img_size / 2, img_size / 2));
   stopSignImg = loadPixmap("../frogpilot/assets/other_images/stop_sign.png", QSize(img_size, img_size));
   upcomingMapsIcon = loadPixmap("../frogpilot/assets/other_images/upcoming_maps_icon.png", QSize(img_size / 2, img_size / 2));
+  visionIcon = loadPixmap("../frogpilot/assets/other_images/vision_icon.png", QSize(img_size / 2, img_size / 2));
 
   animationTimer = new QTimer(this);
   QObject::connect(animationTimer, &QTimer::timeout, [this] {
@@ -1026,8 +1038,11 @@ void AnnotatedCameraWidget::updateFrogPilotVariables(int alert_height, const UIS
   conditionalStatus = scene.conditional_status;
   showConditionalExperimentalStatusBar = scene.cem_status_bar;
 
-  curveSpeed = scene.adjusted_cruise * (is_metric ? MS_TO_KPH : MS_TO_MPH);
+  mtscEnabled = scene.mtsc_enabled;
+  mtscSpeed = scene.mtsc_speed;
   vtscControllingCurve = scene.vtsc_controlling_curve;
+  vtscEnabled = scene.vtsc_enabled;
+  vtscSpeed = scene.vtsc_speed;
 
   currentAcceleration = scene.acceleration;
 
@@ -1046,6 +1061,8 @@ void AnnotatedCameraWidget::updateFrogPilotVariables(int alert_height, const UIS
   leadInfo = scene.lead_metrics;
   obstacleDistance = scene.obstacle_distance;
   obstacleDistanceStock = scene.obstacle_distance_stock;
+
+  leftCurve = scene.left_curve;
 
   mapOpen = scene.map_open;
   bigMapOpen = mapOpen && scene.big_map;
