@@ -61,7 +61,8 @@ class FrogPilotVCruise:
     # Pfeiferj's Map Turn Speed Controller
     if frogpilot_toggles.map_turn_speed_controller and v_ego > CRUISING_SPEED and controlsState.enabled:
       mtsc_active = self.mtsc_target < v_cruise
-      self.mtsc_target = clip(self.mtsc.target_speed(v_ego, carState.aEgo, frogpilot_toggles), CRUISING_SPEED, v_cruise)
+      self.mtsc_target = ((TARGET_LAT_A * frogpilot_toggles.turn_aggressiveness) / (self.mtsc.get_map_curvature(v_ego) * frogpilot_toggles.curve_sensitivity))**0.5
+      self.mtsc_target = clip(self.mtsc_target, CRUISING_SPEED, v_cruise)
 
       curve_detected = (1 / self.frogpilot_planner.road_curvature)**0.5 < v_ego
       if curve_detected and mtsc_active:
@@ -133,7 +134,7 @@ class FrogPilotVCruise:
 
     # Pfeiferj's Vision Turn Controller
     if frogpilot_toggles.vision_turn_controller and v_ego > CRUISING_SPEED and controlsState.enabled:
-      self.vtsc_target = (TARGET_LAT_A * frogpilot_toggles.turn_aggressiveness / self.frogpilot_planner.road_curvature * frogpilot_toggles.curve_sensitivity)**0.5
+      self.vtsc_target = ((TARGET_LAT_A * frogpilot_toggles.turn_aggressiveness) / (self.frogpilot_planner.road_curvature * frogpilot_toggles.curve_sensitivity))**0.5
       self.vtsc_target = clip(self.vtsc_target, CRUISING_SPEED, v_cruise)
     else:
       self.vtsc_target = v_cruise if v_cruise != V_CRUISE_UNSET else 0
