@@ -82,7 +82,7 @@ def manager_init() -> None:
       else:
         params.put(k, params_storage.get(k))
     else:
-      params_storage.put_nonblocking(k, params.get(k))
+      params_storage.put(k, params.get(k))
 
   params.remove("DoToggleReset")
 
