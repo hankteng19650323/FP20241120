@@ -43,11 +43,11 @@ def only_offroad(started, params, CP: car.CarParams, classic_model, frogpilot_to
 
 # FrogPilot functions
 def allow_logging(started, params, CP: car.CarParams, classic_model, frogpilot_toggles) -> bool:
-  return not getattr(frogpilot_toggles, 'no_logging', False) and logging(started, params, CP, classic_model, frogpilot_toggles)
+  return False
 
 def allow_uploads(started, params, CP: car.CarParams, classic_model, frogpilot_toggles) -> bool:
   allow_uploads = not (getattr(frogpilot_toggles, 'no_uploads', False) and not getattr(frogpilot_toggles, 'no_onroad_uploads', False))
-  return allow_uploads
+  return False
 
 def run_classic_modeld(started, params, CP: car.CarParams, classic_model, frogpilot_toggles) -> bool:
   return started and classic_model
