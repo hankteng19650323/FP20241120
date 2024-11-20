@@ -82,7 +82,7 @@ class CarState(CarStateBase):
   def update(self, cp, cp_cam, CC, frogpilot_toggles):
     ret = car.CarState.new_message()
     fp_ret = custom.FrogPilotCarState.new_message()
-    cp_acc = cp_cam if self.CP.carFingerprint in (TSS2_CAR - RADAR_ACC_CAR) or self.CP.flags & ToyotaFlags.DSU_BYPASS.value else cp
+    cp_acc = cp_cam if self.CP.carFingerprint in (TSS2_CAR - RADAR_ACC_CAR) else cp
 
     # Describes the acceleration request from the PCM if on flat ground, may be higher or lower if pitched
     # CLUTCH->ACCEL_NET is only accurate for gas, PCM_CRUISE->ACCEL_NET is only accurate for brake
@@ -186,7 +186,7 @@ class CarState(CarStateBase):
       conversion_factor = CV.KPH_TO_MS if is_metric else CV.MPH_TO_MS
       ret.cruiseState.speedCluster = cluster_set_speed * conversion_factor
 
-    if self.CP.carFingerprint in TSS2_CAR and not self.CP.flags & ToyotaFlags.DISABLE_RADAR.value or self.CP.flags & ToyotaFlags.DSU_BYPASS.value:
+    if self.CP.carFingerprint in TSS2_CAR and not self.CP.flags & ToyotaFlags.DISABLE_RADAR.value:
       if not (self.CP.flags & ToyotaFlags.SMART_DSU.value):
         self.acc_type = cp_acc.vl["ACC_CONTROL"]["ACC_TYPE"]
       ret.stockFcw = bool(cp_acc.vl["PCS_HUD"]["FCW"])
@@ -324,7 +324,7 @@ class CarState(CarStateBase):
         ("PCS_HUD", 1),
       ]
 
-    if CP.carFingerprint not in (TSS2_CAR - RADAR_ACC_CAR) and not CP.enableDsu and not (CP.flags & ToyotaFlags.DISABLE_RADAR.value or CP.flags & ToyotaFlags.DSU_BYPASS.value):
+    if CP.carFingerprint not in (TSS2_CAR - RADAR_ACC_CAR) and not CP.enableDsu and not CP.flags & ToyotaFlags.DISABLE_RADAR.value:
       messages += [
         ("PRE_COLLISION", 33),
       ]
@@ -353,7 +353,7 @@ class CarState(CarStateBase):
         ("LKAS_HUD", 1),
       ]
 
-    if CP.carFingerprint in (TSS2_CAR - RADAR_ACC_CAR) or CP.flags & ToyotaFlags.DSU_BYPASS.value:
+    if CP.carFingerprint in (TSS2_CAR - RADAR_ACC_CAR):
       messages += [
         ("ACC_CONTROL", 33),
         ("PCS_HUD", 1),
