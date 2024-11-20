@@ -50,7 +50,7 @@ class Car:
       num_pandas = len(messaging.recv_one_retry(self.sm.sock['pandaStates']).pandaStates)
       disable_openpilot_long = self.params.get_bool("DisableOpenpilotLongitudinal")
       experimental_long_allowed = self.params.get_bool("ExperimentalLongitudinalEnabled")
-      self.CI, self.CP = get_car(self.can_sock, self.pm.sock['sendcan'], disable_openpilot_long, experimental_long_allowed, self.params, num_pandas)
+      self.CI, self.CP = get_car(self.can_sock, self.pm.sock['sendcan'], disable_openpilot_long, experimental_long_allowed, self.params, num_pandas, get_frogpilot_toggles())
     else:
       self.CI, self.CP = CI, CI.CP
 

@@ -165,6 +165,7 @@ typedef struct UIScene {
   bool experimental_mode_via_tap;
   bool fahrenheit;
   bool force_onroad;
+  bool frogs_go_moo;
   bool full_map;
   bool gpu_metrics;
   bool has_auto_tune;

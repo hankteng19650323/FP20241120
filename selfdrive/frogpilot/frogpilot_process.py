@@ -145,8 +145,6 @@ def frogpilot_thread():
 
   frogpilot_toggles = get_frogpilot_toggles()
 
-  frogs_go_moo = params.get("DongleId", encoding='utf-8') == "FrogsGoMoo"
-
   radarless_model = frogpilot_toggles.radarless_model
 
   toggles_last_updated = None
@@ -207,12 +205,12 @@ def frogpilot_thread():
       check_assets(model_manager, theme_manager)
 
     if params_memory.get_bool("ManualUpdateInitiated"):
-      run_thread_with_lock("update_checks", update_checks, (False, frogs_go_moo, model_manager, now, screen_off, started, theme_manager, time_validated))
+      run_thread_with_lock("update_checks", update_checks, (False, frogpilot_toggles.frogs_go_moo, model_manager, now, screen_off, started, theme_manager, time_validated))
       run_thread_with_lock("update_themes", theme_manager.update_themes())
     elif now.second == 0:
-      run_update_checks = not screen_off and not started or now.minute % 15 == 0 or frogs_go_moo
+      run_update_checks = not screen_off and not started or now.minute % 15 == 0 or frogpilot_toggles.frogs_go_moo
     elif run_update_checks:
-      run_thread_with_lock("update_checks", update_checks, (frogpilot_toggles.automatic_updates, frogs_go_moo, model_manager, now, screen_off, started, theme_manager, time_validated))
+      run_thread_with_lock("update_checks", update_checks, (frogpilot_toggles.automatic_updates, frogpilot_toggles.frogs_go_moo, model_manager, now, screen_off, started, theme_manager, time_validated))
 
       if time_validated:
         theme_manager.update_holiday()

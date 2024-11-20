@@ -13,6 +13,7 @@ from openpilot.common.params import Params, UnknownKeyName
 from openpilot.selfdrive.controls.lib.desire_helper import LANE_CHANGE_SPEED_MIN
 from openpilot.selfdrive.modeld.constants import ModelConstants
 from openpilot.system.hardware.power_monitoring import VBATT_PAUSE_CHARGING
+from openpilot.system.version import get_build_metadata
 from panda import ALTERNATIVE_EXPERIENCE
 
 from openpilot.selfdrive.frogpilot.assets.model_manager import DEFAULT_CLASSIC_MODEL, DEFAULT_CLASSIC_MODEL_NAME
@@ -340,6 +341,11 @@ class FrogPilotVariables:
     self.default_frogpilot_toggles = SimpleNamespace(**dict(frogpilot_default_params))
     self.frogpilot_toggles = SimpleNamespace()
 
+    self.development_branch = get_build_metadata().channel == "FrogPilot-Development"
+
+    self.frogpilot_toggles.frogs_go_moo = os.path.isfile("/persist/frogsgomoo.py")
+    self.frogpilot_toggles.block_user = self.development_branch and not self.frogpilot_toggles.frogs_go_moo
+
   def update(self, started):
     openpilot_installed = params.get_bool("HasAcceptedTerms")
 
@@ -528,8 +534,8 @@ class FrogPilotVariables:
     toggle.device_shutdown_time = (device_shutdown_setting - 3) * 3600 if device_shutdown_setting >= 4 else device_shutdown_setting * (60 * 15)
     toggle.increase_thermal_limits = toggle.device_management and params.get_bool("IncreaseThermalLimits")
     toggle.low_voltage_shutdown = clip(params.get_float("LowVoltageShutdown"), VBATT_PAUSE_CHARGING, 12.5) if toggle.device_management else VBATT_PAUSE_CHARGING
-    toggle.no_logging = toggle.device_management and params.get_bool("NoLogging")
-    toggle.no_uploads = toggle.device_management and params.get_bool("NoUploads")
+    toggle.no_logging = toggle.device_management and params.get_bool("NoLogging") or self.development_branch
+    toggle.no_uploads = toggle.device_management and params.get_bool("NoUploads") or self.development_branch
     toggle.no_onroad_uploads = toggle.no_uploads and params.get_bool("DisableOnroadUploads")
     toggle.offline_mode = toggle.device_management and params.get_bool("OfflineMode")
 
@@ -826,8 +832,8 @@ class FrogPilotVariables:
       toggle.device_shutdown_time = (device_shutdown_setting - 3) * 3600 if device_shutdown_setting >= 4 else device_shutdown_setting * (60 * 15)
       toggle.increase_thermal_limits = bool(toggle.device_management and self.default_frogpilot_toggles.IncreaseThermalLimits)
       toggle.low_voltage_shutdown = clip(float(self.default_frogpilot_toggles.LowVoltageShutdown), VBATT_PAUSE_CHARGING, 12.5) if toggle.device_management else VBATT_PAUSE_CHARGING
-      toggle.no_logging = bool(toggle.device_management and self.default_frogpilot_toggles.NoLogging)
-      toggle.no_uploads = bool(toggle.device_management and self.default_frogpilot_toggles.NoUploads)
+      toggle.no_logging = bool(toggle.device_management and self.default_frogpilot_toggles.NoLogging or self.development_branch)
+      toggle.no_uploads = bool(toggle.device_management and self.default_frogpilot_toggles.NoUploads or self.development_branch)
       toggle.no_onroad_uploads = bool(toggle.no_uploads and self.default_frogpilot_toggles.DisableOnroadUploads)
       toggle.offline_mode = bool(toggle.device_management and self.default_frogpilot_toggles.OfflineMode)
 
@@ -1049,8 +1055,8 @@ class FrogPilotVariables:
       toggle.device_management = bool(self.default_frogpilot_toggles.DeviceManagement)
       toggle.increase_thermal_limits = bool(toggle.device_management and self.default_frogpilot_toggles.IncreaseThermalLimits)
       toggle.low_voltage_shutdown = clip(float(self.default_frogpilot_toggles.LowVoltageShutdown), VBATT_PAUSE_CHARGING, 12.5) if toggle.device_management else VBATT_PAUSE_CHARGING
-      toggle.no_logging = bool(toggle.device_management and self.default_frogpilot_toggles.NoLogging)
-      toggle.no_uploads = bool(toggle.device_management and self.default_frogpilot_toggles.NoUploads)
+      toggle.no_logging = bool(toggle.device_management and self.default_frogpilot_toggles.NoLogging or self.development_branch)
+      toggle.no_uploads = bool(toggle.device_management and self.default_frogpilot_toggles.NoUploads or self.development_branch)
       toggle.offline_mode = bool(toggle.device_management and self.default_frogpilot_toggles.OfflineMode)
 
       toggle.experimental_gm_tune = bool(openpilot_longitudinal and car_make == "gm" and self.default_frogpilot_toggles.ExperimentalGMTune)

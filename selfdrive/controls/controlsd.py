@@ -194,7 +194,6 @@ class Controls:
     self.resume_previously_pressed = False
     self.steer_saturated_event_triggered = False
 
-    self.block_user = self.branch == "FrogPilot-Development" and self.params.get("DongleId", encoding='utf-8') != "FrogsGoMoo"
     self.radarless_model = self.frogpilot_toggles.radarless_model
     self.use_old_long = self.frogpilot_toggles.old_long_api
 
@@ -429,7 +428,7 @@ class Controls:
     # Add FrogPilot events
     self.events.add_from_msg(self.sm['frogpilotPlan'].frogpilotEvents)
 
-    if self.block_user:
+    if self.frogpilot_toggles.block_user:
       self.events.add(EventName.blockUser, static=True)
 
   def data_sample(self):

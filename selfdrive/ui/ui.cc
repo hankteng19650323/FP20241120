@@ -406,6 +406,7 @@ void ui_update_frogpilot_params(UIState *s) {
   scene.dynamic_pedals_on_ui = scene.frogpilot_toggles.value("dynamic_pedals_on_ui").toBool();
   scene.experimental_mode_via_tap = scene.frogpilot_toggles.value("experimental_mode_via_tap").toBool();
   scene.fahrenheit = scene.frogpilot_toggles.value("fahrenheit").toBool();
+  scene.frogs_go_moo = scene.frogpilot_toggles.value("frogs_go_moo").toBool();
   scene.full_map = scene.frogpilot_toggles.value("full_map").toBool();
   scene.gpu_metrics = scene.frogpilot_toggles.value("gpu_metrics").toBool();
   scene.hide_alerts = scene.frogpilot_toggles.value("hide_alerts").toBool();
