@@ -60,24 +60,24 @@ class FrogPilotVCruise:
 
     # Pfeiferj's Map Turn Speed Controller
     if frogpilot_toggles.map_turn_speed_controller and v_ego > CRUISING_SPEED and controlsState.enabled:
-      mtsc_active = self.mtsc_target < v_cruise
+      mtsc_active = self.mtsc_target < v_cruise_cluster
       self.mtsc_target = ((TARGET_LAT_A * frogpilot_toggles.turn_aggressiveness) / (self.mtsc.get_map_curvature(v_ego) * frogpilot_toggles.curve_sensitivity))**0.5
-      self.mtsc_target = clip(self.mtsc_target, CRUISING_SPEED, v_cruise)
+      self.mtsc_target = clip(self.mtsc_target, CRUISING_SPEED, v_cruise_cluster)
 
       curve_detected = (1 / self.frogpilot_planner.road_curvature)**0.5 < v_ego
       if curve_detected and mtsc_active:
         self.mtsc_target = self.frogpilot_planner.v_cruise
       elif not curve_detected and frogpilot_toggles.mtsc_curvature_check:
-        self.mtsc_target = v_cruise
+        self.mtsc_target = v_cruise_cluster
 
       if self.mtsc_target == CRUISING_SPEED:
-        self.mtsc_target = v_cruise
+        self.mtsc_target = v_cruise_cluster
     else:
-      self.mtsc_target = v_cruise if v_cruise != V_CRUISE_UNSET else 0
+      self.mtsc_target = v_cruise_cluster if v_cruise != V_CRUISE_UNSET else 0
 
     # Pfeiferj's Speed Limit Controller
     if frogpilot_toggles.speed_limit_controller:
-      self.slc.update(frogpilotCarState.dashboardSpeedLimit, controlsState.enabled, frogpilotNavigation.navigationSpeedLimit, v_cruise, v_ego, frogpilot_toggles)
+      self.slc.update(frogpilotCarState.dashboardSpeedLimit, controlsState.enabled, frogpilotNavigation.navigationSpeedLimit, v_cruise_cluster, v_ego, frogpilot_toggles)
       unconfirmed_slc_target = self.slc.desired_speed_limit
 
       if (frogpilot_toggles.speed_limit_changed_alert or frogpilot_toggles.speed_limit_confirmation) and self.slc_target != 0:
@@ -124,9 +124,9 @@ class FrogPilotVCruise:
         if frogpilot_toggles.speed_limit_controller_override_manual:
           if carState.gasPressed:
             self.overridden_speed = v_ego + v_ego_diff
-          self.overridden_speed = clip(self.overridden_speed, self.slc_target, v_cruise + v_cruise_diff)
+          self.overridden_speed = clip(self.overridden_speed, self.slc_target, v_cruise_cluster)
         elif frogpilot_toggles.speed_limit_controller_override_set_speed:
-          self.overridden_speed = v_cruise + v_cruise_diff
+          self.overridden_speed = v_cruise_cluster
       else:
         self.overridden_speed = 0
     else:
@@ -135,9 +135,9 @@ class FrogPilotVCruise:
     # Pfeiferj's Vision Turn Controller
     if frogpilot_toggles.vision_turn_controller and v_ego > CRUISING_SPEED and controlsState.enabled:
       self.vtsc_target = ((TARGET_LAT_A * frogpilot_toggles.turn_aggressiveness) / (self.frogpilot_planner.road_curvature * frogpilot_toggles.curve_sensitivity))**0.5
-      self.vtsc_target = clip(self.vtsc_target, CRUISING_SPEED, v_cruise)
+      self.vtsc_target = clip(self.vtsc_target, CRUISING_SPEED, v_cruise_cluster)
     else:
-      self.vtsc_target = v_cruise if v_cruise != V_CRUISE_UNSET else 0
+      self.vtsc_target = v_cruise_cluster if v_cruise != V_CRUISE_UNSET else 0
 
     if frogpilot_toggles.force_standstill and carState.standstill and not self.override_force_stop and controlsState.enabled:
       self.forcing_stop = True
