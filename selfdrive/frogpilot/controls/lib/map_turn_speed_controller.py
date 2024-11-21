@@ -46,7 +46,7 @@ class MapTurnSpeedController:
       current_latitude = position["latitude"]
       current_longitude = position["longitude"]
     except:
-      return 0.0
+      return 1e-6
 
     min_dist = 1000.0
     min_idx = 0
@@ -76,10 +76,10 @@ class MapTurnSpeedController:
         break
 
     if target_idx is None or target_idx == 0 or target_idx >= len(forward_points) - 1:
-      return 0.0
+      return 1e-6
 
     p1 = (forward_points[target_idx - 1]["latitude"], forward_points[target_idx - 1]["longitude"])
     p2 = (forward_points[target_idx]["latitude"], forward_points[target_idx]["longitude"])
     p3 = (forward_points[target_idx + 1]["latitude"], forward_points[target_idx + 1]["longitude"])
 
-    return calculate_curvature(p1, p2, p3)
+    return max(calculate_curvature(p1, p2, p3), 1e-6)
